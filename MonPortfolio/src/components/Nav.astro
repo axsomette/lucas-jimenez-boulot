@@ -8,7 +8,16 @@ const navLinks = [
 <header class="nav" role="banner">
   <div class="container nav__inner">
 
-    <a href="/" class="nav__logo" aria-label="Lucas Jimenez Boulot — Accueil">
+    <a href={import.meta.env.BASE_URL} class="nav__logo" aria-label="Lucas Jimenez Boulot — Accueil">
+      <img
+        src={`${import.meta.env.BASE_URL}/profile.jpeg`}
+        alt=""
+        class="nav__logo-avatar"
+        width="28"
+        height="28"
+        loading="eager"
+        aria-hidden="true"
+      />
       Lucas Jimenez <span class="nav__logo-accent">Boulot</span>
     </a>
 
@@ -108,6 +117,28 @@ const navLinks = [
     color: var(--color-text);
     letter-spacing: var(--tracking-tight);
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .nav__logo-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    object-position: center top;
+    border: 1.5px solid var(--color-border-accent);
+    flex-shrink: 0;
+    transition: border-color var(--transition-fast);
+  }
+
+  .nav__logo:hover .nav__logo-avatar {
+    border-color: var(--color-accent);
+  }
+
+  @media (max-width: 720px) {
+    .nav__logo-avatar { display: none; }
   }
 
   .nav__logo-accent {

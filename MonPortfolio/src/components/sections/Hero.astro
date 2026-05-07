@@ -205,6 +205,17 @@
     color: var(--color-text-2);
   }
 
+  /* Reset du style global code qui ajoute border + padding sur tous les <code> */
+  .hero__code code {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    border-radius: 0;
+    color: inherit;
+  }
+
   /* Syntax */
   .t-kw  { color: #c792ea; }
   .t-id  { color: #82aaff; }

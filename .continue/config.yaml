@@ -1,0 +1,66 @@
+# Continue config — MonPortfolio
+# Compatible JetBrains PhpStorm / WebStorm + VS Code
+
+name: MonPortfolio
+version: 1.0.0
+
+# Modèles LLM
+models:
+  - name: Claude Sonnet
+    provider: anthropic
+    model: claude-sonnet-4-5
+    apiKey: $ANTHROPIC_API_KEY
+
+  - name: Claude Haiku (rapide)
+    provider: anthropic
+    model: claude-haiku-4-5-20251001
+    apiKey: $ANTHROPIC_API_KEY
+
+# Modèle d'autocomplétion
+tabAutocompleteModel:
+  name: Claude Haiku
+  provider: anthropic
+  model: claude-haiku-4-5-20251001
+  apiKey: $ANTHROPIC_API_KEY
+
+# Contexte automatique
+context:
+  - provider: file
+  - provider: code
+  - provider: docs
+    params:
+      urls:
+        - https://docs.astro.build/
+        - https://www.typescriptlang.org/docs/
+        - https://motion.dev/docs
+  - provider: terminal
+  - provider: diff
+  - provider: open
+
+# Règles du projet (chargées automatiquement)
+rules:
+  - filePattern: "**/*.astro"
+    rule: |
+      Tu travailles sur un projet Astro 5 + TypeScript.
+      - Utilise la syntaxe Astro moderne (frontmatter typé, Content Collections)
+      - Composants statiques en .astro, interactifs en .tsx avec directive client:
+      - CSS via custom properties uniquement, pas de Tailwind
+      - Output static uniquement (pas de SSR)
+  - filePattern: "**/*.tsx"
+    rule: |
+      Composant React dans un projet Astro.
+      - TypeScript strict, typer toutes les props
+      - Utiliser les hooks React modernes
+      - Minimiser le JS client — Astro islands pattern
+  - filePattern: "**/*.css"
+    rule: |
+      CSS moderne avec cascade layers et custom properties.
+      - Pas de !important
+      - Mobile-first
+      - Utiliser oklch() pour les couleurs
+
+# Ignore ces dossiers
+ignore:
+  - dist/
+  - node_modules/
+  - .astro/

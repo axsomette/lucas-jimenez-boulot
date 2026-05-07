@@ -1,0 +1,288 @@
+---
+const navLinks = [
+  { href: '#projets', label: 'Projets'  },
+  { href: '#apropos', label: 'À propos' },
+];
+---
+
+<header class="nav" role="banner">
+  <div class="container nav__inner">
+
+    <a href="/" class="nav__logo" aria-label="Lucas Jimenez Boulot — Accueil">
+      Lucas <span class="nav__logo-accent">JB</span>
+    </a>
+
+    <nav aria-label="Navigation principale">
+      <ul class="nav__links">
+        {navLinks.map(link => (
+          <li>
+            <a href={link.href} class="nav__link">{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <a href="#contact" class="btn btn--outline nav__cta">
+      Me contacter
+    </a>
+
+    <button
+      class="nav__burger"
+      aria-label="Ouvrir le menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <span class="nav__burger-line"></span>
+      <span class="nav__burger-line"></span>
+      <span class="nav__burger-line"></span>
+    </button>
+
+  </div>
+
+  <div class="nav__mobile" id="mobile-menu" role="dialog" aria-label="Menu mobile" hidden>
+    <nav>
+      <ul class="nav__mobile-links">
+        {navLinks.map(link => (
+          <li>
+            <a href={link.href} class="nav__mobile-link">{link.label}</a>
+          </li>
+        ))}
+        <li>
+          <a href="#contact" class="btn btn--primary nav__mobile-cta">
+            Me contacter
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: var(--z-nav);
+    height: var(--nav-height);
+    background-color: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    transition: border-color var(--transition-base);
+    overflow: visible;
+  }
+
+  .nav::after {
+    content: '';
+    position: absolute;
+    inset-block-end: -1px;
+    inset-inline: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      var(--color-border) 0%,
+      var(--color-border) 55%,
+      #6366f1 78%,
+      #818cf8 90%,
+      #c7d2fe 100%
+    );
+    pointer-events: none;
+  }
+
+  .nav.scrolled {
+    border-bottom-color: var(--color-border-hover);
+  }
+
+  .nav__inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  /* Logo */
+  .nav__logo {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    letter-spacing: var(--tracking-tight);
+    flex-shrink: 0;
+  }
+
+  .nav__logo-accent {
+    color: var(--color-accent);
+  }
+
+  /* Liens */
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .nav__link {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .nav__link:hover,
+  .nav__link.active {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  /* CTA */
+  .nav__cta {
+    flex-shrink: 0;
+    font-size: var(--text-sm);
+    padding-block: 0.5rem;
+  }
+
+  /* Burger */
+  .nav__burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    min-height: 44px;
+    min-width: 44px;
+    transition: border-color var(--transition-fast);
+  }
+
+  .nav__burger:hover { border-color: var(--color-border-hover); }
+
+  .nav__burger-line {
+    display: block;
+    width: 18px;
+    height: 1.5px;
+    background-color: var(--color-text);
+    border-radius: var(--radius-full);
+    transition: transform var(--transition-base), opacity var(--transition-fast);
+    margin-inline: auto;
+  }
+
+  /* Mobile menu */
+  .nav__mobile {
+    position: absolute;
+    inset-block-start: var(--nav-height);
+    inset-inline: 0;
+    background-color: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-4) var(--container-padding) var(--space-6);
+  }
+
+  .nav__mobile[hidden] { display: none; }
+
+  .nav__mobile-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .nav__mobile-link {
+    display: block;
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-2);
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-md);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .nav__mobile-link:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  .nav__mobile-cta {
+    width: 100%;
+    justify-content: center;
+    margin-block-start: var(--space-3);
+  }
+
+  /* Responsive */
+  @media (max-width: 720px) {
+    .nav__links,
+    .nav__cta { display: none; }
+    .nav__burger { display: flex; }
+  }
+
+  /* Burger ouvert */
+  .nav__burger[aria-expanded="true"] .nav__burger-line:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .nav__burger[aria-expanded="true"] .nav__burger-line:nth-child(2) {
+    opacity: 0;
+  }
+  .nav__burger[aria-expanded="true"] .nav__burger-line:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+</style>
+
+<script>
+  const nav = document.querySelector('.nav') as HTMLElement;
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  const burger = document.querySelector('.nav__burger') as HTMLButtonElement;
+  const mobileMenu = document.getElementById('mobile-menu') as HTMLElement;
+
+  burger?.addEventListener('click', () => {
+    const isOpen = burger.getAttribute('aria-expanded') === 'true';
+    burger.setAttribute('aria-expanded', String(!isOpen));
+    mobileMenu.hidden = isOpen;
+  });
+
+  mobileMenu?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      burger.setAttribute('aria-expanded', 'false');
+      mobileMenu.hidden = true;
+    });
+  });
+
+  // Lien actif
+  const sections = document.querySelectorAll<HTMLElement>('[data-section]');
+  const navLinksEl = document.querySelectorAll<HTMLAnchorElement>('.nav__link');
+
+  new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinksEl.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' }).observe = function(target) {
+    IntersectionObserver.prototype.observe.call(this, target);
+  };
+
+  const sectionObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinksEl.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => sectionObs.observe(s));
+</script>

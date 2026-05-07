@@ -1,0 +1,2 @@
+/* Déclaration des cascade layers — ordre de priorité croissant */
+@layer reset, base, layout, components, utilities;

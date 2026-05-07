@@ -1,0 +1,246 @@
+---
+/**
+ * ProjectCard — Carte épurée avec effet shimmer sur bordure
+ */
+interface Props {
+  title: string;
+  description: string;
+  tags: string[];
+  url?: string | undefined;
+  github?: string | undefined;
+  featured?: boolean;
+  image?: string | undefined;
+}
+
+const { title, description, tags, url, github, featured = false, image } = Astro.props;
+
+// Préfixe le BASE_URL pour les assets public/
+const resolveAsset = (path?: string) =>
+  path ? `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}` : undefined;
+const resolvedImage = resolveAsset(image);
+---
+
+<article
+  class:list={['project-card card', { 'project-card--featured': featured }]}
+  aria-label={`Projet : ${title}`}
+>
+  {resolvedImage && (
+    <div class="project-card__bubble-wrap" aria-hidden="true">
+      <div class="project-card__bubble">
+        <img
+          src={resolvedImage}
+          alt=""
+          class="project-card__bubble-img"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    </div>
+  )}
+
+  <div class="project-card__body">
+    {featured && (
+      <span class="project-card__badge" aria-label="Projet mis en avant">
+        Featured
+      </span>
+    )}
+
+    <h3 class="project-card__title">{title}</h3>
+    <p class="project-card__desc">{description}</p>
+
+    <ul class="project-card__tags" aria-label="Technologies utilisées">
+      {tags.map(tag => (
+        <li><span class="tag">{tag}</span></li>
+      ))}
+    </ul>
+  </div>
+
+  <footer class="project-card__footer">
+    {url && (
+      <a
+        href={url}
+        class="btn btn--outline project-card__btn"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Voir le projet ${title} (ouvre dans un nouvel onglet)`}
+      >
+        Voir le projet
+        <svg aria-hidden="true" width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <path d="M3.5 3H9m0 0v5.5M9 3 3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    )}
+    {github && (
+      <a
+        href={github}
+        class="btn btn--ghost project-card__btn"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Code source de ${title} sur GitHub (ouvre dans un nouvel onglet)`}
+      >
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
+        </svg>
+        Code
+      </a>
+    )}
+    {!url && !github && (
+      <span class="project-card__soon mono">En cours</span>
+    )}
+  </footer>
+</article>
+
+<style>
+  /* ── Bordure indigo complète + pic shiny coin supérieur droit ── */
+
+  /* Mixin réutilisable via custom properties */
+  .project-card__bubble-wrap {
+    display: flex;
+    justify-content: center;
+    padding-block-start: var(--space-8);
+    padding-block-end: var(--space-2);
+  }
+
+  .project-card__bubble {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 2px solid var(--color-border-accent);
+    box-shadow:
+      0 0 0 4px rgba(99, 102, 241, 0.08),
+      0 4px 16px rgba(99, 102, 241, 0.18);
+    background-color: var(--color-surface);
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+    flex-shrink: 0;
+  }
+
+  .project-card:hover .project-card__bubble {
+    box-shadow:
+      0 0 0 5px rgba(99, 102, 241, 0.14),
+      0 6px 22px rgba(99, 102, 241, 0.28);
+    transform: translateY(-2px);
+  }
+
+  .project-card__bubble-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid transparent;
+    --shine-base:  rgba(99, 102, 241, 0.35);
+    --shine-mid:   rgba(165, 180, 252, 0.75);
+    --shine-peak:  rgba(220, 225, 255, 0.95);
+    background-image:
+      linear-gradient(var(--color-surface), var(--color-surface)),
+      conic-gradient(
+        from 0deg,
+        var(--shine-base) 0deg,
+        var(--shine-base) 22deg,
+        var(--shine-mid)  38deg,
+        var(--shine-peak) 45deg,
+        var(--shine-mid)  52deg,
+        var(--shine-base) 68deg,
+        var(--shine-base) 360deg
+      );
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transition: --shine-peak var(--transition-base),
+                --shine-mid  var(--transition-base),
+                --shine-base var(--transition-base);
+  }
+
+  /* Hover : pic plus lumineux */
+  .project-card:hover {
+    --shine-base:  rgba(99, 102, 241, 0.45);
+    --shine-mid:   rgba(185, 195, 255, 0.88);
+    --shine-peak:  rgba(255, 255, 255, 0.98);
+  }
+
+  /* Featured : base plus visible + pic maximal */
+  .project-card--featured {
+    --shine-base:  rgba(99, 102, 241, 0.50);
+    --shine-mid:   rgba(165, 180, 252, 0.88);
+    --shine-peak:  rgba(255, 255, 255, 1.00);
+  }
+
+  .project-card--featured:hover {
+    --shine-base:  rgba(99, 102, 241, 0.60);
+    --shine-mid:   rgba(200, 210, 255, 0.95);
+    --shine-peak:  rgba(255, 255, 255, 1.00);
+  }
+
+  /* ── Badge featured ── */
+  .project-card__badge {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-accent);
+    background: var(--color-accent-light);
+    border: 1px solid var(--color-border-accent);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .project-card__body {
+    flex: 1;
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .project-card__title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .project-card__desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-2);
+    line-height: var(--leading-relaxed);
+    flex: 1;
+  }
+
+  .project-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-start: auto;
+    padding-block-start: var(--space-2);
+  }
+
+  .project-card__footer {
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .project-card__btn {
+    font-size: var(--text-xs);
+    padding-block: 0.4rem;
+    padding-inline: 0.75rem;
+    min-height: 36px;
+  }
+
+  .project-card__soon {
+    font-size: var(--text-xs);
+    color: var(--color-text-3);
+  }
+
+</style>

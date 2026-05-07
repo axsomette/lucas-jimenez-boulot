@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "skills": {
+    "astro": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "astro/SKILL.md",
+      "computedHash": "88e5967a26240b1ae697b466a51c7d5cb9eed45b06da50533b20971c8546363d"
+    },
+    "css": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "css/SKILL.md",
+      "computedHash": "80c477418be4bdd2d102ba5a71760125a9c1925292f5b3c208ee56ab9e6e3cc2"
+    },
+    "gsap": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "gsap/SKILL.md",
+      "computedHash": "2e8b1557817779caec2da7bd1ef8cb1ac84a39a37bea9d20c7997b8e8b644aff"
+    },
+    "html": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "html/SKILL.md",
+      "computedHash": "3cdff568d692ae5dd1adebfbbcae39f07eaf27e6a578be5de9a4549ac295a804"
+    },
+    "jest": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "jest/SKILL.md",
+      "computedHash": "c92bc60ac2a54f6cbc0ec0c4e5204f7ec2f6847326aeade455edc85a833ac1df"
+    },
+    "motion": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "motion/SKILL.md",
+      "computedHash": "d7c0539701283262ad97226463e11a3785700f401463b51c6963006e03358e66"
+    },
+    "react": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "react/SKILL.md",
+      "computedHash": "463b2de9fe87acf9bc3cb692a91d8628ee1502aee2c77745d2dd1f6bfe206779"
+    },
+    "storybook": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "storybook/SKILL.md",
+      "computedHash": "560d4c5443255951fa76259c22e6ba41a43335efc921d5dac4f5450f65d8ef24"
+    },
+    "testing": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "testing/SKILL.md",
+      "computedHash": "c3abe4e5e7b310cdce556d75f0a78c7df629a93b6b69013ad72a2493e0f56fd8"
+    },
+    "three-js": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "three-js/SKILL.md",
+      "computedHash": "c48ddf92429d86404b3aecf86f7ab1f1fe9b9625bf17bad29a488db25cf2765f"
+    },
+    "typescript": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "typescript/SKILL.md",
+      "computedHash": "0d109e1aac465feed57433e20cf0409ec7436c1519f0c67a2d4336b008fd26cc"
+    },
+    "ui-design": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/SKILL.md",
+      "computedHash": "d2b331ca97c47dc5d3e02557436b496469c3693327fad9a5f68c2b31e13349d1"
+    },
+    "ux-design": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "ux-design/SKILL.md",
+      "computedHash": "281fdd51b3ee348c678d5a8f416ff63a9ede9ea6200687ec006dc48cbf216522"
+    },
+    "vite": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "vite/SKILL.md",
+      "computedHash": "5d3925481f1f9a00e1646a1250defdda114f7b83cfacff293f0582942b08ae07"
+    }
+  }
+}

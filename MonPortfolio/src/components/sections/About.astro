@@ -1,0 +1,413 @@
+---
+const skills = [
+  {
+    category: 'Frontend',
+    icon: '▲',
+    color: 'var(--color-accent)',
+    items: ['React', 'JavaScript', 'Vite', 'CSS moderne'],
+  },
+  {
+    category: 'Backend / CMS',
+    icon: '◈',
+    color: '#34d399',
+    items: ['Drupal', 'PHP', 'Node.js', 'SQL', 'REST API'],
+  },
+  {
+    category: 'DevOps & Outils',
+    icon: '⬡',
+    color: '#f59e0b',
+    items: ['Git', 'GitHub Actions', 'GitLab', 'Linux', 'macOS', 'Figma', 'Claude', 'Gemini'],
+  },
+];
+
+const values = [
+  {
+    num: '01',
+    title: 'Code maintenable',
+    desc: 'Lisibilité avant tout. Un bon code se lit comme de la prose, pas comme une devinette.',
+  },
+  {
+    num: '02',
+    title: 'Performance first',
+    desc: 'Core Web Vitals, bundle size, requêtes SQL — chaque milliseconde compte.',
+  },
+  {
+    num: '03',
+    title: 'Collaboration',
+    desc: 'Je travaille au plus près du produit et des équipes pour livrer ce qui a de la valeur.',
+  },
+];
+---
+
+<section id="apropos" class="section" data-section aria-label="À propos">
+  <div class="container">
+
+    <header class="about__header reveal">
+      <span class="section-label">À propos</span>
+      <h2 class="section-title">Qui suis-je&nbsp;?</h2>
+    </header>
+
+    <div class="about__grid">
+      <div class="about__left">
+
+        {/* Photo — placez votre photo dans public/profile.jpg pour l'afficher */}
+        <div class="about__photo reveal">
+          <div class="about__photo-ring" aria-hidden="true">
+            <div class="about__photo-frame">
+              <img
+                src={`${import.meta.env.BASE_URL}profile.jpeg`}
+                alt="Lucas Jimenez Boulot"
+                class="about__photo-img"
+                width="96"
+                height="96"
+                loading="lazy"
+                onerror="this.style.visibility='hidden'"
+              />
+              <div class="about__photo-fallback">LJB</div>
+            </div>
+          </div>
+          <div class="about__photo-info">
+            <p class="about__photo-name">Lucas Jimenez Boulot</p>
+            <p class="about__photo-role">Développeur Full-Stack</p>
+            <p class="about__photo-loc">
+              <svg aria-hidden="true" width="11" height="11" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1.5A4.5 4.5 0 0 0 3.5 6c0 3 4.5 8.5 4.5 8.5S12.5 9 12.5 6A4.5 4.5 0 0 0 8 1.5Zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" fill="currentColor"/>
+              </svg>
+              Montpellier, FR
+            </p>
+          </div>
+        </div>
+
+        <div class="about__bio reveal">
+          <p>
+            Développeur Full-Stack basé à <strong>Montpellier</strong>, je conçois
+            et développe des applications web de bout en bout — du backend à l'interface.
+          </p>
+          <p>
+            Passionné par la création de produits qui <strong>fonctionnent vraiment</strong> :
+            du code propre, des interfaces intuitives, des systèmes fiables dans le temps.
+          </p>
+          <p>
+            J'aime les projets qui ont du sens. En autonomie comme en équipe,
+            je m'investis pleinement pour livrer un travail de qualité.
+          </p>
+        </div>
+
+        <ul class="about__values" aria-label="Mes valeurs">
+          {values.map(v => (
+            <li class="about__value">
+              <span class="about__value-num" aria-hidden="true">{v.num}</span>
+              <div class="about__value-body">
+                <h3 class="about__value-title">{v.title}</h3>
+                <p class="about__value-desc">{v.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <aside class="about__skills card reveal" aria-label="Stack technique">
+        <div class="about__skills-header">
+          <h3 class="about__skills-title">Stack technique</h3>
+        </div>
+
+        <div class="about__skills-list">
+          {skills.map(group => (
+            <div class="about__skill-group" style={`--group-color: ${group.color}`}>
+              <h4 class="about__skill-cat">
+                <span class="about__skill-icon" aria-hidden="true">{group.icon}</span>
+                {group.category}
+              </h4>
+              <ul class="about__skill-tags" aria-label={`Compétences ${group.category}`}>
+                {group.items.map(item => (
+                  <li><span class="tag about__tag">{item}</span></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .about__header { margin-bottom: var(--space-12); }
+
+  .about__grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: var(--space-12);
+    align-items: start;
+  }
+
+  /* ── Colonne gauche ── */
+  .about__left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  /* ── Bloc photo ── */
+  .about__photo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .about__photo-ring {
+    flex-shrink: 0;
+    padding: 2px;
+    border-radius: var(--radius-full);
+    background: conic-gradient(
+      var(--color-accent) 0deg,
+      var(--color-accent-light) 180deg,
+      var(--color-border) 360deg
+    );
+  }
+
+  .about__photo-frame {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--color-surface-2), #2d2d2d);
+    border: 2px solid var(--color-bg);
+  }
+
+  .about__photo-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-mono);
+    color: var(--color-text-2);
+    letter-spacing: 0.05em;
+    z-index: 0;
+  }
+
+  .about__photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+
+  .about__photo-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .about__photo-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .about__photo-role {
+    font-size: var(--text-sm);
+    color: var(--color-accent-text);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+  }
+
+  .about__photo-loc {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-2);
+    margin-top: var(--space-1);
+    line-height: 1;
+  }
+
+  /* ── Bio ── */
+  .about__bio {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .about__bio p {
+    font-size: var(--text-lg);
+    color: #c8c8c8;
+    line-height: var(--leading-relaxed);
+  }
+
+  .about__bio strong {
+    color: var(--color-text);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* ── Values ── */
+  .about__values {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .about__value {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-5);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+    transition: background var(--transition-fast);
+    border-radius: 0;
+    margin-inline: calc(var(--space-4) * -1);
+    padding-inline: var(--space-4);
+  }
+
+  .about__value:hover {
+    background: rgba(99, 102, 241, 0.04);
+  }
+
+  .about__value:hover .about__value-num {
+    color: var(--color-accent);
+  }
+
+  .about__value-num {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-3);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wide);
+    flex-shrink: 0;
+    width: 2ch;
+    transition: color var(--transition-fast);
+  }
+
+  .about__value-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .about__value-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .about__value-desc {
+    font-size: var(--text-sm);
+    color: #a0a0a0;
+    line-height: var(--leading-relaxed);
+  }
+
+  /* ── Skills panel ── */
+  .about__skills {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-6));
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .about__skills-header {
+    padding: var(--space-5) var(--space-6) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+  }
+
+  .about__skills-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+  }
+
+  .about__skills-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .about__skill-group {
+    padding: var(--space-4) var(--space-6);
+    transition: background var(--transition-fast);
+    position: relative;
+  }
+
+  .about__skill-group::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--group-color, var(--color-accent));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .about__skill-group:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .about__skill-group:hover::before {
+    opacity: 1;
+  }
+
+  .about__skill-group + .about__skill-group {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .about__skill-cat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+    color: var(--group-color, var(--color-accent));
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    margin-bottom: var(--space-3);
+    opacity: 0.85;
+  }
+
+  .about__skill-icon {
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .about__skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Tags légèrement plus visibles */
+  .about__tag {
+    color: #c0c0c0;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .about__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-10);
+    }
+    .about__skills { position: static; }
+  }
+
+  @media (max-width: 640px) {
+    .about__value {
+      gap: var(--space-4);
+    }
+  }
+</style>

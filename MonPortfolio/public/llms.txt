@@ -1,0 +1,43 @@
+# Lucas Jimenez Boulot
+
+> Développeur Full-Stack basé à Montpellier, France. Je conçois et développe des applications web de bout en bout — du backend robuste à l'interface soignée. Disponible pour des projets professionnels.
+
+## Identité
+
+- **Nom** : Lucas Jimenez Boulot
+- **Rôle** : Développeur Full-Stack
+- **Localisation** : Montpellier, France
+- **Email** : lucas@kaneva.io
+- **LinkedIn** : https://fr.linkedin.com/in/lucas-jimenez-boulot-35629919b
+- **GitHub** : https://github.com/axsomette
+
+## Compétences techniques
+
+### Frontend
+React, JavaScript, TypeScript, HTML, SCSS, CSS moderne (custom properties, container queries, cascade layers), Vite, Astro
+
+### Backend & CMS
+PHP, Drupal 11, Twig, Composer, Node.js, SQL, REST API
+
+### DevOps & Outils
+Git, GitHub Actions, GitLab CI, CI/CD Pipeline, Linux, macOS, Figma
+
+### Intelligence Artificielle
+Claude (Anthropic), Gemini (Google), Cursor, GitHub Copilot
+
+## Projets
+
+### MonBudget — Finance Manager
+Application web progressive (PWA) de gestion de budget personnel. Suivi des dépenses, simulateur financier intelligent, analyses visuelles avec graphiques interactifs. 100% local, aucune donnée transmise.
+- Technologies : JavaScript, Tailwind CSS, Chart.js, PWA
+- URL : https://axsomette.github.io
+
+### Pauline Labat Photographie
+Portfolio photographique sur-mesure pour une photographe professionnelle. Galeries thématiques (Architecture, Voyages, Tirages), gestion éditoriale autonome via back-office Drupal, formulaire de contact intégré.
+- Technologies : Drupal 11, PHP 8.3, MySQL, Twig, Composer
+
+## À propos
+
+Je suis un développeur Full-Stack passionné par les produits bien pensés et le code maintenable. Je travaille aussi bien sur des architectures backend complexes (Drupal, PHP, SQL) que sur des interfaces frontend modernes (React, CSS, animations). J'attache une grande importance à la performance web (Core Web Vitals), à l'accessibilité (WCAG 2.1 AA) et à l'expérience utilisateur.
+
+Salarié, non freelance. Basé à Montpellier, ouvert aux opportunités locales et en télétravail.

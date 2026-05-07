@@ -46,7 +46,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/jpeg" href={`${import.meta.env.BASE_URL}/profile.jpeg`} />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}/profile.jpeg`} />
 
     <!-- Author -->
     <meta name="author" content="Lucas Jimenez Boulot" />
@@ -74,10 +75,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       "email": "lucas@kaneva.io",
       "address": { "@type": "PostalAddress", "addressLocality": "Montpellier", "addressCountry": "FR" },
       "sameAs": [
-        "https://github.com/kaneva",
+        "https://github.com/axsomette",
         "https://fr.linkedin.com/in/%F0%9F%92%BB-lucas-jimenez-boulot-35629919b"
       ],
-      "knowsAbout": ["Drupal", "PHP", "React", "JavaScript", "Vite", "Node.js", "SQL"]
+      "knowsAbout": ["Drupal 11", "PHP", "Twig", "Composer", "React", "JavaScript", "TypeScript", "HTML", "SCSS", "CSS", "Vite", "Astro", "Node.js", "SQL", "REST API", "Git", "GitHub Actions", "GitLab CI", "CI/CD", "Linux", "Figma"]
     })} />
 
     <!-- JSON-LD — WebSite -->

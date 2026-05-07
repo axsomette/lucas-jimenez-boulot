@@ -85,7 +85,12 @@ const resolvedImage = resolveAsset(image);
       </a>
     )}
     {!url && !github && (
-      <span class="project-card__soon mono">En cours</span>
+      <span class="project-card__soon" aria-label="Projet en cours de développement">
+        En cours
+        <span class="project-card__dots" aria-hidden="true">
+          <span>.</span><span>.</span><span>.</span>
+        </span>
+      </span>
     )}
   </footer>
 </article>
@@ -239,8 +244,38 @@ const resolvedImage = resolveAsset(image);
   }
 
   .project-card__soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
     font-size: var(--text-xs);
-    color: var(--color-text-3);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .project-card__dots {
+    display: inline-flex;
+    gap: 1px;
+  }
+
+  .project-card__dots span {
+    animation: dot-pulse 1.4s ease-in-out infinite;
+    opacity: 0;
+  }
+
+  .project-card__dots span:nth-child(1) { animation-delay: 0s; }
+  .project-card__dots span:nth-child(2) { animation-delay: 0.2s; }
+  .project-card__dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-pulse {
+    0%, 60%, 100% { opacity: 0; }
+    30%            { opacity: 1; }
   }
 
 </style>

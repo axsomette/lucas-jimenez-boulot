@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://kaneva.github.io/sitemap-index.xml
+Sitemap: https://axsomette.github.io/lucas-jimenez-boulot/sitemap-index.xml

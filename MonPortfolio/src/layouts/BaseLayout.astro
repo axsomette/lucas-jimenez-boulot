@@ -10,9 +10,9 @@ interface Props {
 }
 
 const {
-  title = 'Lucas Jimenez Boulot — Développeur Full-Stack',
+  title = 'Lucas Jimenez Boulot · Développeur Full-Stack à Montpellier',
   description = 'Développeur Full-Stack basé à Montpellier. Je conçois et développe des applications web performantes de bout en bout.',
-  ogImage = '/og-image.png',
+  ogImage = '/profile.jpeg',
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -24,6 +24,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0f0f0f" />
 
     <!-- SEO -->
     <title>{title}</title>
@@ -85,7 +86,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Lucas Jimenez Boulot — Portfolio",
+      "name": "Lucas Jimenez Boulot · Portfolio",
       "url": String(Astro.site ?? '').replace(/\/$/, ''),
       "description": description,
       "inLanguage": "fr-FR"

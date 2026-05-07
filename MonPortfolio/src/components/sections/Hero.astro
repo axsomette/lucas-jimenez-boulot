@@ -20,7 +20,7 @@
 
       <p class="hero__desc">
         Je suis <strong>Lucas Jimenez Boulot</strong>, développeur Full-Stack.
-        Je conçois et développe des applications web de bout en bout —
+        Je conçois et développe des applications web de bout en bout,
         du backend robuste à l'interface soignée.
       </p>
 
@@ -138,7 +138,7 @@
   .hero__desc {
     font-size: var(--text-lg);
     color: var(--color-text-2);
-    max-width: 48ch;
+    max-width: 60ch;
     line-height: var(--leading-relaxed);
     margin-bottom: var(--space-8);
   }
@@ -299,6 +299,8 @@
 
   @media (max-width: 480px) {
     .hero__title { font-size: var(--text-4xl); }
+    .hero__desc  { font-size: var(--text-base); }
+    .hero__code  { font-size: calc(var(--text-xs) * 0.92); }
     .hero__meta  { grid-template-columns: 1fr; }
     .hero__meta-item + .hero__meta-item {
       border-left: none;

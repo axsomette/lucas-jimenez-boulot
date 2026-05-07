@@ -18,6 +18,22 @@ const projectsCollection = defineCollection({
   }),
 });
 
+const experiencesCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    role: z.string(),
+    company: z.string(),
+    type: z.enum(['CDI', 'CDD', 'Alternance', 'Formation']),
+    location: z.string(),
+    startDate: z.date(),
+    endDate: z.date().optional(),
+    current: z.boolean().default(false),
+    skills: z.array(z.string()),
+    order: z.number(),
+  }),
+});
+
 export const collections = {
   projects: projectsCollection,
+  experiences: experiencesCollection,
 };

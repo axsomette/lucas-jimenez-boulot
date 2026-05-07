@@ -1,6 +1,6 @@
 # Lucas Jimenez Boulot
 
-> Développeur Full-Stack basé à Montpellier, France. Je conçois et développe des applications web de bout en bout — du backend robuste à l'interface soignée. Disponible pour des projets professionnels.
+> Développeur Full-Stack basé à Montpellier, France. Je conçois et développe des applications web de bout en bout, du backend robuste à l'interface soignée. Disponible pour des projets professionnels.
 
 ## Identité
 

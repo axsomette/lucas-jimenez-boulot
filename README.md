@@ -1,27 +1,21 @@
-# MonPortfolio
+# Lucas Jimenez Boulot — Portfolio
 
-Portfolio personnel de développeur — construit avec Astro 5 + TypeScript, déployé sur GitHub Pages.
+Portfolio personnel de **Lucas Jimenez Boulot**, développeur Full-Stack basé à Montpellier.
 
-## Démarrage rapide
+Je conçois et développe des applications web de bout en bout — du backend robuste à l'interface soignée. Passionné par les produits bien pensés, je travaille aussi bien côté serveur (PHP, Drupal, Node.js, SQL) que côté client (React, JavaScript, Vite).
 
-```bash
-# Installer les dépendances
-npm install
+## Projets présentés
 
-# Lancer le serveur de développement
-npm run dev
-# → http://localhost:4321
+**MonBudget — Finance Manager**  
+Application web progressive (PWA) de gestion de budget personnel. Suivi des dépenses, simulateur financier et analyses visuelles. 100% local, aucune donnée transmise.
 
-# Build production
-npm run build
+**Pauline Labat Photographie**  
+Portfolio photographique sur-mesure pour une photographe professionnelle. Galeries thématiques, gestion éditoriale autonome via back-office Drupal et formulaire de contact.
 
-# Preview du build
-npm run preview
-```
+## Stack
 
-## Documentation
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — Stack technique, structure, patterns
-- [CLAUDE.md](./CLAUDE.md) — Règles et contexte pour Claude
+Astro 5 · TypeScript · CSS moderne · React · Motion One · GSAP
 
-## Déploiement
-Automatique via GitHub Actions sur push vers `main` → GitHub Pages.
+## Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](./LICENSE).

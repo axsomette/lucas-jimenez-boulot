@@ -2,10 +2,10 @@
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const navLinks = [
-  { href: '#projets',           label: 'Projets'    },
-  { href: '#experience',        label: 'Expérience' },
-  { href: '#apropos',           label: 'À propos'   },
-  { href: `${base}/blog`,       label: 'Blog', external: true },
+  { href: `${base}/#projets`,    label: 'Projets'    },
+  { href: `${base}/#experience`, label: 'Expérience' },
+  { href: `${base}/#apropos`,    label: 'À propos'   },
+  { href: `${base}/blog`,        label: 'Blog', external: true },
 ];
 ---
 
@@ -41,7 +41,7 @@ const navLinks = [
       </ul>
     </nav>
 
-    <a href="#contact" class="btn btn--outline nav__cta">
+    <a href={`${base}/#contact`} class="btn btn--outline nav__cta">
       Me contacter
     </a>
 
@@ -67,10 +67,7 @@ const navLinks = [
           </li>
         ))}
         <li>
-          <a href={`${base}/blog`} class="nav__mobile-link">Blog</a>
-        </li>
-        <li>
-          <a href="#contact" class="btn btn--primary nav__mobile-cta">
+          <a href={`${base}/#contact`} class="btn btn--primary nav__mobile-cta">
             Me contacter
           </a>
         </li>
@@ -316,7 +313,9 @@ const navLinks = [
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         navLinksEl.forEach(link => {
-          link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+          // Compare uniquement le hash (#projets, #experience…) peu importe le préfixe base
+          const linkHash = link.getAttribute('href')?.split('#')[1];
+          link.classList.toggle('active', linkHash === entry.target.id);
         });
       }
     });

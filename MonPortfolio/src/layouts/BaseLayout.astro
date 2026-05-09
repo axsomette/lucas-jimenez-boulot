@@ -61,18 +61,26 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <!-- Author -->
     <meta name="author" content="Lucas Jimenez Boulot" />
 
-    <!-- Fonts — preconnect + preload pour le LCP -->
+    <!-- Fonts — chargement NON-BLOQUANT (évite la page blanche sur mobile) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Trick media="print" + onload : le navigateur télécharge la feuille de style
+      sans bloquer le rendu (print = basse priorité), puis onload la bascule en "all".
+      Sans ça, la police bloque le premier rendu jusqu'à 8s sur mobile lent.
+    -->
+    <link rel="preload" as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" />
     <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" />
+    </noscript>
 
     <!-- JSON-LD — Person -->
     <script type="application/ld+json" set:html={JSON.stringify({

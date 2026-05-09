@@ -30,11 +30,7 @@ const projectTypes = [
 
 ---
 
-<script
-  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-  async
-  defer
-></script>
+<!-- Turnstile chargé en lazy via JS (voir <script> en bas) -->
 
 <section id="contact" class="section section--alt" data-section aria-label="Contact">
   <div class="container">
@@ -143,13 +139,8 @@ const projectTypes = [
             </span>
           </div>
 
-          {/* Turnstile */}
-          <div
-            class="cf-turnstile"
-            data-sitekey={TURNSTILE_SITE_KEY}
-            data-theme="dark"
-            data-size="flexible"
-          ></div>
+          {/* Turnstile — rendu en mode explicit après chargement lazy */}
+          <div id="turnstile-container" aria-label="Vérification de sécurité"></div>
           <span
             id="error-turnstile"
             class="form__error"
@@ -925,4 +916,52 @@ const projectTypes = [
   resetBtn?.addEventListener('click', resetToForm);
 
   })(); // fin IIFE initContactForm
+
+  // ══════════════════════════════════════════════════════════════════
+  // Turnstile — chargement LAZY via IntersectionObserver
+  // Ne se charge QUE quand l'utilisateur approche la section Contact
+  // (évite de bloquer le chargement de la page entière au démarrage)
+  // ══════════════════════════════════════════════════════════════════
+  (function initTurnstileLazy() {
+    const SITE_KEY   = '0x4AAAAAADML4xDhDRFZnWrK';
+    const container  = document.getElementById('turnstile-container');
+    const section    = document.getElementById('contact');
+    if (!container || !section) return;
+
+    let loaded = false;
+
+    const loadTurnstile = () => {
+      if (loaded) return;
+      loaded = true;
+
+      const script = document.createElement('script');
+      // Mode explicit : Turnstile n'initialise rien automatiquement
+      script.src   = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    };
+
+    // Callback global appelé par Turnstile une fois son script chargé
+    (window as any).onTurnstileLoad = () => {
+      (window as any).turnstile?.render(container, {
+        sitekey:  SITE_KEY,
+        theme:    'dark',
+        size:     'flexible',
+      });
+    };
+
+    // Observer : déclenche le chargement 300px avant que la section soit visible
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          obs.disconnect();
+          loadTurnstile();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+
+    obs.observe(section);
+  })();
 </script>

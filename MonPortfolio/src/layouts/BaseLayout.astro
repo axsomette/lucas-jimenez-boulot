@@ -82,6 +82,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       "knowsAbout": ["Drupal 11", "PHP", "Twig", "Composer", "React", "JavaScript", "TypeScript", "HTML", "SCSS", "CSS", "Vite", "Astro", "Node.js", "SQL", "REST API", "Git", "GitHub Actions", "GitLab CI", "CI/CD", "Linux", "Figma"]
     })} />
 
+    <!-- Slot pour les pages enfants (ex: JSON-LD BlogPosting) -->
+    <slot name="head" />
+
     <!-- JSON-LD — WebSite -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",

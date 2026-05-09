@@ -1,8 +1,11 @@
 ---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 const navLinks = [
-  { href: '#projets',    label: 'Projets'    },
-  { href: '#experience', label: 'Expérience' },
-  { href: '#apropos',    label: 'À propos'   },
+  { href: '#projets',           label: 'Projets'    },
+  { href: '#experience',        label: 'Expérience' },
+  { href: '#apropos',           label: 'À propos'   },
+  { href: `${base}/blog`,       label: 'Blog', external: true },
 ];
 ---
 
@@ -26,7 +29,13 @@ const navLinks = [
       <ul class="nav__links">
         {navLinks.map(link => (
           <li>
-            <a href={link.href} class="nav__link">{link.label}</a>
+            <a
+              href={link.href}
+              class="nav__link"
+              data-external={link.external ? 'true' : undefined}
+            >
+              {link.label}
+            </a>
           </li>
         ))}
       </ul>
@@ -57,6 +66,9 @@ const navLinks = [
             <a href={link.href} class="nav__mobile-link">{link.label}</a>
           </li>
         ))}
+        <li>
+          <a href={`${base}/blog`} class="nav__mobile-link">Blog</a>
+        </li>
         <li>
           <a href="#contact" class="btn btn--primary nav__mobile-cta">
             Me contacter
@@ -290,21 +302,15 @@ const navLinks = [
     });
   });
 
-  // Lien actif
-  const sections = document.querySelectorAll<HTMLElement>('[data-section]');
-  const navLinksEl = document.querySelectorAll<HTMLAnchorElement>('.nav__link');
+  // Lien actif — uniquement les liens d'ancres (#), pas les liens de pages
+  const sections   = document.querySelectorAll<HTMLElement>('[data-section]');
+  const navLinksEl = document.querySelectorAll<HTMLAnchorElement>('.nav__link:not([data-external])');
 
-  new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navLinksEl.forEach(link => {
-          link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' }).observe = function(target) {
-    IntersectionObserver.prototype.observe.call(this, target);
-  };
+  // Marquer le lien Blog actif si on est sur /blog
+  const blogLink = document.querySelector<HTMLAnchorElement>('.nav__link[data-external]');
+  if (blogLink && window.location.pathname.includes('/blog')) {
+    blogLink.classList.add('active');
+  }
 
   const sectionObs = new IntersectionObserver(entries => {
     entries.forEach(entry => {

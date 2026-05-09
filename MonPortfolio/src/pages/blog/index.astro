@@ -1,0 +1,210 @@
+---
+/**
+ * blog/index.astro — Liste de tous les articles
+ * Triés par date décroissante, hors drafts
+ */
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+
+const posts = allPosts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map(post => {
+    const wordCount   = post.body.split(/\s+/).length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+    return { ...post, readingTime };
+  });
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout
+  title="Blog · Lucas Jimenez Boulot"
+  description="Articles techniques sur Drupal, PHP, JavaScript, PWA, et le développement web. Retours d'expérience de terrain."
+>
+  <div class="blog-index section">
+    <div class="container">
+
+      <header class="blog-index__header reveal">
+        <a href={`${base}/`} class="blog-index__back" aria-label="Retour à l'accueil">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Accueil
+        </a>
+        <span class="section-label">Blog</span>
+        <h1 class="section-title">Articles techniques</h1>
+        <p class="section-subtitle">
+          Retours d'expérience sur Drupal, PHP, JavaScript et le développement web.
+          Des articles de fond, pas de tutoriels débutants.
+        </p>
+      </header>
+
+      {posts.length > 0 ? (
+        <ul class="blog-index__grid" aria-label="Liste des articles">
+          {posts.map(post => {
+            const formattedDate = new Intl.DateTimeFormat('fr-FR', {
+              year:  'numeric',
+              month: 'long',
+              day:   'numeric',
+            }).format(new Date(post.data.date));
+
+            return (
+              <li>
+                <a
+                  href={`${base}/blog/${post.slug}`}
+                  class="post-card card"
+                  aria-label={`Lire l'article : ${post.data.title}`}
+                >
+                  <article>
+                    <header class="post-card__header">
+                      <div class="post-card__meta">
+                        <time
+                          class="post-card__date"
+                          datetime={new Date(post.data.date).toISOString()}
+                        >
+                          {formattedDate}
+                        </time>
+                        <span class="post-card__sep" aria-hidden="true">·</span>
+                        <span class="post-card__reading-time">
+                          {post.readingTime} min
+                        </span>
+                      </div>
+                      <h2 class="post-card__title">{post.data.title}</h2>
+                    </header>
+
+                    <p class="post-card__excerpt">{post.data.excerpt}</p>
+
+                    {post.data.tags.length > 0 && (
+                      <footer class="post-card__tags" aria-label="Tags">
+                        {post.data.tags.slice(0, 3).map(tag => (
+                          <span class="tag">{tag}</span>
+                        ))}
+                      </footer>
+                    )}
+                  </article>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p class="blog-index__empty" role="status">
+          Des articles arrivent bientôt…
+        </p>
+      )}
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .blog-index__header {
+    max-width: 860px;
+    margin-bottom: var(--space-12);
+  }
+
+  .blog-index__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-2);
+    margin-bottom: var(--space-6);
+    transition: color var(--transition-fast);
+  }
+
+  .blog-index__back:hover {
+    color: var(--color-accent-text);
+  }
+
+  /* ── Grille d'articles ── */
+  .blog-index__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+    gap: var(--space-6);
+  }
+
+  /* ── Cards ── */
+  .post-card {
+    display: block;
+    padding: var(--space-8);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--transition-base), transform var(--transition-slow);
+  }
+
+  .post-card:hover {
+    border-color: var(--color-border-accent);
+    transform: translateY(-2px);
+  }
+
+  .post-card article {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    height: 100%;
+  }
+
+  .post-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .post-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .post-card__date,
+  .post-card__reading-time,
+  .post-card__sep {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-3);
+  }
+
+  .post-card__title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--transition-fast);
+  }
+
+  .post-card:hover .post-card__title {
+    color: var(--color-accent-text);
+  }
+
+  .post-card__excerpt {
+    font-size: var(--text-base);
+    color: var(--color-text-2);
+    line-height: var(--leading-relaxed);
+    flex: 1;
+  }
+
+  .post-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: auto;
+  }
+
+  .blog-index__empty {
+    font-size: var(--text-lg);
+    color: var(--color-text-3);
+    text-align: center;
+    padding: var(--space-16) 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .post-card { padding: var(--space-6); }
+  }
+</style>

@@ -33,7 +33,24 @@ const experiencesCollection = defineCollection({
   }),
 });
 
+/**
+ * Collection : blog
+ * Articles techniques — frontmatter typé
+ */
+const blogCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title:    z.string(),
+    date:     z.date(),
+    excerpt:  z.string(),
+    tags:     z.array(z.string()),
+    draft:    z.boolean().default(false),
+    ogImage:  z.string().optional(),
+  }),
+});
+
 export const collections = {
-  projects: projectsCollection,
+  projects:    projectsCollection,
   experiences: experiencesCollection,
+  blog:        blogCollection,
 };

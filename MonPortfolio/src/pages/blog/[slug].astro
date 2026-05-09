@@ -1,0 +1,35 @@
+---
+/**
+ * blog/[slug].astro — Page de détail d'un article
+ * getStaticPaths() génère les routes statiques au build
+ */
+import { getCollection } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props:  { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+// Calcul dynamique du temps de lecture (200 mots/min)
+const wordCount   = post.body.split(/\s+/).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+---
+
+<BlogPost
+  title={post.data.title}
+  date={post.data.date}
+  excerpt={post.data.excerpt}
+  tags={post.data.tags}
+  readingTime={readingTime}
+  ogImage={post.data.ogImage}
+>
+  <Content />
+</BlogPost>

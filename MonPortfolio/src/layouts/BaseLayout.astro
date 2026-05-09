@@ -23,6 +23,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Script synchrone — s'exécute AVANT le premier rendu du navigateur.
+      Ajoute la classe .js sur <html> pour que le CSS puisse masquer
+      les éléments .reveal uniquement quand JS est disponible.
+      Sans ça, les utilisateurs sans JS (ou en cas de chargement lent)
+      voient une page noire pendant le chargement des animations.
+    -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#0f0f0f" />
 

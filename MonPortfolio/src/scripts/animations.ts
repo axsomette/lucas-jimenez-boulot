@@ -10,18 +10,32 @@ function getReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/** Révèle tous les éléments .reveal immédiatement (sans animation) */
+function revealAll(): void {
+  document.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
+    el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+  });
+}
+
 export async function initAnimations(): Promise<void> {
   if (getReducedMotion()) {
-    // Rendre tout visible immédiatement, sans animation
-    document.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
-      el.style.opacity = '1';
-      el.style.transform = 'none';
-    });
+    revealAll();
     return;
   }
 
+  /*
+   * Timeout de sécurité — si motion met plus de 600 ms à charger
+   * (première visite, réseau lent, CDN lent…), on révèle tout
+   * immédiatement pour éviter la page noire. Le timeout est annulé
+   * dès que motion est prêt.
+   */
+  const safetyTimer = setTimeout(revealAll, 600);
+
   try {
     const { animate, inView, stagger } = await import('motion');
+    clearTimeout(safetyTimer); // Motion chargé à temps — on annule le fallback
 
     // Éléments individuels (headers, bios, etc.)
     const singles = document.querySelectorAll<HTMLElement>(
@@ -76,7 +90,8 @@ export async function initAnimations(): Promise<void> {
     });
 
   } catch {
-    // Fallback : IntersectionObserver natif si Motion n'est pas installé
+    clearTimeout(safetyTimer);
+    // Fallback : IntersectionObserver natif si Motion n'est pas disponible
     fallback();
   }
 }

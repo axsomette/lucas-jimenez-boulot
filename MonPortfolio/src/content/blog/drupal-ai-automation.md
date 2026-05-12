@@ -1,6 +1,6 @@
 ---
 title: "Drupal + Claude AI : Automatiser la gestion de contenu avec les LLMs"
-date: 2026-05-26
+date: 2025-09-04
 excerpt: "Intégrer Claude API dans Drupal pour l'automation de contenu. Cas d'usage, architecture, et code example."
 tags: ["Drupal", "PHP", "Intelligence Artificielle", "Claude API", "Automation"]
 draft: false

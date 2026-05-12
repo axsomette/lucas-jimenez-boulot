@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="200" viewBox="0 0 260 200">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFB331"/>
+      <stop offset="100%" stop-color="#FF7A00"/>
+    </linearGradient>
+  </defs>
+  <circle cx="130" cy="100" r="96" fill="url(#grad)"/>
+  <path d="M46 96h168v44a44 44 0 0 1-44 44H90a44 44 0 0 1-44-44z" fill="#EF1F3A"/>
+  <text x="130" y="96" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="48" font-weight="700" fill="#fff">PLANET</text>
+  <text x="130" y="142" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="42" font-weight="700" fill="#FFD35A">foot</text>
+  <path d="M82 66l30-36h36l30 36z" fill="#fff" opacity="0.35"/>
+</svg>
+

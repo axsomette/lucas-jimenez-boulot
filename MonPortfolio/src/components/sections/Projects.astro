@@ -27,21 +27,33 @@ const sortedProjects = allProjects.sort((a, b) => {
     </header>
 
     {sortedProjects.length > 0 ? (
-      <ul class="projects__grid" aria-label="Liste des projets">
-        {sortedProjects.map(project => (
-          <li>
-            <ProjectCard
-              title={project.data.title}
-              description={project.data.description}
-              tags={project.data.tags}
-              url={project.data.url}
-              github={project.data.github}
-              featured={project.data.featured}
-              image={project.data.image}
-            />
-          </li>
-        ))}
-      </ul>
+      <>
+        {/* Filtres */}
+        <div class="projects__filters reveal" role="group" aria-label="Filtrer les projets">
+          <button class="projects__filter-btn active" data-filter="all" aria-pressed="true">Tous</button>
+          <button class="projects__filter-btn" data-filter="perso" aria-pressed="false">Perso</button>
+          <button class="projects__filter-btn" data-filter="pro" aria-pressed="false">Pro</button>
+        </div>
+
+        <ul class="projects__grid" aria-label="Liste des projets">
+          {sortedProjects.map(project => (
+            <li data-type={project.data.type}>
+              <ProjectCard
+                title={project.data.title}
+                description={project.data.description}
+                tags={project.data.tags}
+                url={project.data.url}
+                github={project.data.github}
+                featured={project.data.featured}
+                image={project.data.image}
+                type={project.data.type}
+                client={project.data.client}
+                status={project.data.status}
+              />
+            </li>
+          ))}
+        </ul>
+      </>
     ) : (
       <p class="projects__empty" role="status">
         Des projets arrivent bientôt…
@@ -56,11 +68,51 @@ const sortedProjects = allProjects.sort((a, b) => {
     max-width: 860px;
   }
 
+  /* ── Filtres ── */
+  .projects__filters {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-8);
+  }
+
+  .projects__filter-btn {
+    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-2);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 0.35rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    min-height: 36px;
+    transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .projects__filter-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-2);
+  }
+
+  .projects__filter-btn.active {
+    color: var(--color-accent);
+    border-color: var(--color-border-accent);
+    background: var(--color-accent-light);
+  }
+
   .projects__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
     gap: var(--space-6);
     margin-bottom: var(--space-12);
+  }
+
+  /* Items masqués lors du filtrage */
+  .projects__grid li[hidden] {
+    display: none;
   }
 
   .projects__empty {
@@ -75,3 +127,28 @@ const sortedProjects = allProjects.sort((a, b) => {
     justify-content: center;
   }
 </style>
+
+<script>
+  (function initProjectFilters() {
+    const btns  = document.querySelectorAll<HTMLButtonElement>('.projects__filter-btn');
+    const items = document.querySelectorAll<HTMLElement>('.projects__grid li[data-type]');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter as string;
+
+        // Mettre à jour les boutons
+        btns.forEach(b => {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-pressed', String(b === btn));
+        });
+
+        // Afficher / masquer les projets
+        items.forEach(item => {
+          const show = filter === 'all' || item.dataset.type === filter;
+          item.hidden = !show;
+        });
+      });
+    });
+  })();
+</script>

@@ -1,6 +1,6 @@
 ---
 title: "SCSS Architecture dans Drupal : BEM, Cascade Layers, et design tokens"
-date: 2026-06-02
+date: 2025-10-09
 excerpt: "Comment j'organise le CSS dans mes projets Drupal : de la feuille de styles en vrac à une architecture maintenable avec BEM, Cascade Layers et des tokens de design."
 tags: ["SCSS", "CSS", "Drupal", "BEM", "Architecture Front-End"]
 draft: false

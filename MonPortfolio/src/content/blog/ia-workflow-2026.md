@@ -1,6 +1,6 @@
 ---
 title: "Claude + Gemini en 2026 : comment l'IA a changé ma façon de coder au quotidien"
-date: 2026-06-23
+date: 2025-12-05
 excerpt: "Ni hype aveugle, ni rejet. Voici comment j'intègre Claude et Gemini dans mon workflow réel de développeur : ce qui marche, ce qui ne marche pas, et ce que ça change vraiment."
 tags: ["Intelligence Artificielle", "Claude", "Gemini", "Productivité", "Developer Tools"]
 draft: false

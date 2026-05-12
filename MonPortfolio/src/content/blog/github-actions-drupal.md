@@ -1,6 +1,6 @@
 ---
 title: "GitHub Actions pour Drupal : mon pipeline CI/CD de zéro à la production"
-date: 2026-06-09
+date: 2025-10-30
 excerpt: "Comment j'automatise le déploiement Drupal avec GitHub Actions : tests, build des assets, mise à jour de la base de données, et rollback. Un pipeline que j'utilise en production."
 tags: ["GitHub Actions", "CI/CD", "Drupal", "DevOps", "Linux"]
 draft: false

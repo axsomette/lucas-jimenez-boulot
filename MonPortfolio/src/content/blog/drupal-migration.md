@@ -1,6 +1,6 @@
 ---
 title: "Drupal 9→11 : Migration réussie d'une plateforme 22 instances"
-date: 2026-05-12
+date: 2025-07-22
 excerpt: "Retour d'expérience sur la migration d'une plateforme Drupal multisite complexe. Lessons learned, solutions, et pièges à éviter."
 tags: ["Drupal", "PHP", "Migration", "Multisite", "DevOps"]
 draft: false

@@ -1,6 +1,6 @@
 ---
 title: "JavaScript Vanilla en 2026 : ce que MonBudget m'a appris sur le code sans framework"
-date: 2026-06-30
+date: 2025-12-18
 excerpt: "J'ai construit MonBudget en JavaScript vanilla, sans React, sans Vue, sans rien. Voici ce que j'ai appris sur les patterns modernes, les vraies limites du sans-framework, et quand c'est le bon choix."
 tags: ["JavaScript", "Vanilla JS", "Architecture", "Performance", "No Framework"]
 draft: false

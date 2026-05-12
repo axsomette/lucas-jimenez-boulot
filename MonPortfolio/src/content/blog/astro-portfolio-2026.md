@@ -1,6 +1,6 @@
 ---
 title: "Pourquoi j'ai construit mon portfolio avec Astro 5 plutôt que Next.js"
-date: 2026-06-16
+date: 2025-11-20
 excerpt: "Le choix d'un framework pour un portfolio n'est pas anodin. Voici pourquoi Astro s'est imposé face à Next.js, et ce que ça m'a appris sur le développement web moderne."
 tags: ["Astro", "Next.js", "Performance", "JavaScript", "Portfolio"]
 draft: false

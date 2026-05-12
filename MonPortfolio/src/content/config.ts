@@ -12,7 +12,13 @@ const projectsCollection = defineCollection({
     tags: z.array(z.string()),
     date: z.date(),
     featured: z.boolean().default(false),
+    /** 'perso' = projet personnel, 'pro' = réalisé en mission/agence */
+    type: z.enum(['perso', 'pro']).default('perso'),
+    /** Nom du client ou de l'agence (optionnel, pour les projets pro) */
+    client: z.string().optional(),
     image: z.string().optional(),
+    /** 'wip' = en cours, 'offline' = hors ligne, 'active' = en ligne (défaut) */
+    status: z.enum(['active', 'wip', 'offline']).optional().default('active'),
     url: z.string().url().optional(),
     github: z.string().url().optional(),
   }),

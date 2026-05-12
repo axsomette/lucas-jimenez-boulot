@@ -1,6 +1,6 @@
 ---
 title: "PWA Offline-First : Comment MonBudget fonctionne sans serveur"
-date: 2026-05-19
+date: 2025-08-14
 excerpt: "Construire une Progressive Web App 100% offline avec JavaScript vanilla. Architecture, stockage local, et sync intelligente."
 tags: ["PWA", "JavaScript", "Offline-First", "IndexedDB", "Service Worker"]
 draft: false

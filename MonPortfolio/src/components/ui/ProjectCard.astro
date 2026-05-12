@@ -10,9 +10,12 @@ interface Props {
   github?: string | undefined;
   featured?: boolean;
   image?: string | undefined;
+  type?: 'perso' | 'pro';
+  client?: string | undefined;
+  status?: 'active' | 'wip' | 'offline';
 }
 
-const { title, description, tags, url, github, featured = false, image } = Astro.props;
+const { title, description, tags, url, github, featured = false, image, type = 'perso', client, status = 'active' } = Astro.props;
 
 // Préfixe le BASE_URL pour les assets public/
 const resolveAsset = (path?: string) =>
@@ -39,11 +42,19 @@ const resolvedImage = resolveAsset(image);
   )}
 
   <div class="project-card__body">
-    {featured && (
-      <span class="project-card__badge" aria-label="Projet mis en avant">
-        Featured
+    <div class="project-card__badges">
+      {featured && (
+        <span class="project-card__badge project-card__badge--featured" aria-label="Projet mis en avant">
+          Featured
+        </span>
+      )}
+      <span
+        class:list={['project-card__badge', type === 'pro' ? 'project-card__badge--pro' : 'project-card__badge--perso']}
+        aria-label={type === 'pro' ? 'Projet professionnel' : 'Projet personnel'}
+      >
+        {type === 'pro' ? 'Pro' : 'Perso'}
       </span>
-    )}
+    </div>
 
     <h3 class="project-card__title">{title}</h3>
     <p class="project-card__desc">{description}</p>
@@ -84,7 +95,12 @@ const resolvedImage = resolveAsset(image);
         Code
       </a>
     )}
-    {!url && !github && (
+    {!url && !github && status === 'offline' && (
+      <span class="project-card__offline" aria-label="Projet hors ligne">
+        Hors ligne
+      </span>
+    )}
+    {!url && !github && status !== 'offline' && (
       <span class="project-card__soon" aria-label="Projet en cours de développement">
         En cours
         <span class="project-card__dots" aria-hidden="true">
@@ -181,20 +197,44 @@ const resolvedImage = resolveAsset(image);
     --shine-peak:  rgba(255, 255, 255, 1.00);
   }
 
-  /* ── Badge featured ── */
+  /* ── Badges row ── */
+  .project-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
   .project-card__badge {
     display: inline-block;
     font-size: var(--text-xs);
     font-family: var(--font-mono);
     font-weight: var(--font-weight-medium);
-    color: var(--color-accent);
-    background: var(--color-accent-light);
-    border: 1px solid var(--color-border-accent);
     padding: 0.15rem 0.5rem;
     border-radius: var(--radius-sm);
     width: fit-content;
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
+  }
+
+  /* Featured — indigo */
+  .project-card__badge--featured {
+    color: var(--color-accent);
+    background: var(--color-accent-light);
+    border: 1px solid var(--color-border-accent);
+  }
+
+  /* Pro — vert émeraude discret */
+  .project-card__badge--pro {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+  }
+
+  /* Perso — lavande subtile */
+  .project-card__badge--perso {
+    color: #a5b4fc;
+    background: rgba(165, 180, 252, 0.08);
+    border: 1px solid rgba(165, 180, 252, 0.2);
   }
 
   .project-card__body {
@@ -257,6 +297,33 @@ const resolvedImage = resolveAsset(image);
     border-radius: var(--radius-sm);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
+  }
+
+  /* Hors ligne */
+  .project-card__offline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-3);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .project-card__offline::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-text-3);
+    flex-shrink: 0;
   }
 
   .project-card__dots {

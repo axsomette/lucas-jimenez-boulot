@@ -5,7 +5,8 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://axsomette.github.io',
+  site: 'https://axsomette.github.io/lucas-jimenez-boulot',
   base: '/lucas-jimenez-boulot',
+  trailingSlash: 'always',
   integrations: [react(), mdx(), sitemap()],
 });

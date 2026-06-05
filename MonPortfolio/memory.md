@@ -42,6 +42,16 @@
 
 ---
 
+## Audit AI SEO (2026-06-04)
+
+Rapport `AUDIT-AI-SEO.md` créé à la racine (lecture seule, aucun code modifié).
+- **P0** : URL d'entité fausse dans les JSON-LD (`Astro.site` sans le `base /lucas-jimenez-boulot`) ; LinkedIn incohérent entre `llms.txt` et schema ; pas de FAQ + `FAQPage`.
+- **P1** : enrichir `BlogPosting` (`dateModified`, `image`, `keywords`, `mainEntityOfPage`) ; compléter `Person` ; étendre `llms.txt` (2 projets / 0 article listés sur 9 / 12).
+- **P2** : image OG dédiée 1200×630, favicon.svg au lieu de profile.jpeg, date « mis à jour le ».
+- Déjà solide : robots.txt ouvert aux bots IA, sitemap, blog très extractible, E-E-A-T OK.
+
+---
+
 ## Choix de design
 
 - Style **neutre pro** : blanc/gris + accent indigo (`oklch(54% 0.165 254)`)

@@ -42,7 +42,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           return (
             <li>
               <a
-                href={`${base}/blog/${post.slug}`}
+                href={`${base}/blog/${post.slug}/`}
                 class="post-card card"
                 aria-label={`Lire l'article : ${post.data.title}`}
               >
@@ -80,7 +80,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </ul>
 
       <div class="latest-posts__cta reveal">
-        <a href={`${base}/blog`} class="btn btn--outline">
+        <a href={`${base}/blog/`} class="btn btn--outline">
           Voir tous les articles
           <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>

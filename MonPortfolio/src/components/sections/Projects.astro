@@ -16,7 +16,7 @@ const sortedProjects = allProjects.sort((a, b) => {
 ---
 
 <section id="projets" class="section section--alt" data-section aria-label="Mes projets">
-  <div class="container">
+  <div class="container projects__container">
     <header class="projects__header reveal">
       <span class="section-label">Réalisations</span>
       <h2 class="section-title">Mes projets</h2>
@@ -111,13 +111,30 @@ const sortedProjects = allProjects.sort((a, b) => {
   }
 
   /*
-    En desktop, `auto-fill` retombait à deux colonnes : la largeur utile
-    plafonne à 1040px (container 1120px moins 2×40px de padding) alors que
-    trois pistes de 340px plus deux gouttières de 24px en réclament 1068.
-    Il manquait 28px. On impose donc les trois colonnes au-delà de 1080px,
-    où chaque carte dispose encore d'environ 317px.
+    Trois colonnes en desktop, mais pas dans le container global.
+
+    Celui-ci plafonne à 1120px, soit 1040px utiles : trois colonnes y font
+    330px, largeur à laquelle les descriptions techniques partent sur une
+    dizaine de lignes et les cartes deviennent des colonnes étroites et très
+    hautes. La grille sort donc du container et se recentre sur le viewport,
+    plafonnée à 1400px, ce qui porte les colonnes à environ 420px.
+
+    L'entête de section reste, lui, dans le container : il s'aligne ainsi
+    avec les entêtes des autres sections.
+
+    Le débordement passe par des marges négatives calculées plutôt que par un
+    `transform`, qui aurait créé un contexte d'empilement au-dessus des <li>
+    animés au scroll.
   */
-  @media (min-width: 1080px) {
+  @media (min-width: 1280px) {
+    /*
+      C'est le container de la section qui s'élargit, pas seulement la grille :
+      l'entête, les filtres et les cartes gardent ainsi le même bord gauche.
+      Élargir la seule grille laissait « Mes projets » 160px en retrait des
+      cartes, ce que l'œil lit comme un défaut d'alignement.
+    */
+    .projects__container { max-width: 1400px; }
+
     .projects__grid { grid-template-columns: repeat(3, 1fr); }
   }
 

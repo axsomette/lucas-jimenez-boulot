@@ -2,7 +2,7 @@
 title: "PWA offline-first : MonBudget tourne sans serveur"
 date: 2025-08-14
 excerpt: "Construire une Progressive Web App 100% offline en JavaScript vanilla : architecture, stockage local et synchronisation."
-tags: ["PWA", "JavaScript", "Offline-First", "IndexedDB", "Service Worker"]
+tags: ["PWA", "JavaScript", "Offline-First", "localStorage", "Service Worker"]
 draft: false
 ---
 
@@ -25,17 +25,13 @@ MonBudget est construit avec JavaScript vanilla et Chart.js. Aucun framework, au
 
 ```
 monbudget/
-├── index.html
-├── manifest.json
+├── index.html         # Page de présentation
+├── app.html           # L'application
+├── app.js             # Toute la logique (4 923 lignes)
+├── style.css
 ├── sw.js              # Service Worker
-├── js/
-│   ├── app.js         # Logique principale
-│   ├── db.js          # Couche IndexedDB
-│   ├── charts.js      # Visualisations Chart.js
-│   └── sync.js        # Synchronisation (future)
-└── icons/
-    ├── icon-192.png
-    └── icon-512.png
+├── manifest.json
+└── icon-192.png, icon-512.png, icon.svg…
 ```
 
 J'ai écarté les frameworks pour garder le bundle à zéro et me forcer à connaître les APIs web natives.
@@ -73,55 +69,33 @@ self.addEventListener('fetch', (event) => {
 
 La stratégie ici est **Cache First** : le Service Worker sert la ressource depuis le cache, et ne va sur le réseau que s'il ne l'y trouve pas. Pour une app 100% statique comme MonBudget, ça suffit.
 
-## Stockage local : localStorage vs IndexedDB
+## Stockage local : le choix de localStorage
 
-### localStorage
+MonBudget range tout dans `localStorage`, sur six clés :
 
-Synchrone, limité à 5-10 Mo, et réservé aux chaînes de caractères. Il convient pour une préférence utilisateur ou un token de session, et décroche dès que les données deviennent structurées et volumineuses.
-
-```javascript
-localStorage.setItem('theme', 'dark');
-const theme = localStorage.getItem('theme');
-```
-
-### IndexedDB
-
-Base de données asynchrone, orientée objets, avec support des transactions et des index. Capacité de stockage bien supérieure (typiquement plusieurs centaines de Mo selon le navigateur).
-
-Pour MonBudget, IndexedDB stocke toutes les transactions financières :
+| Clé | Contenu |
+|---|---|
+| `budgetData` | Les lignes de revenus et de dépenses |
+| `budgetCategories` | Catégories, sous-catégories et limites |
+| `budgetGoals` | Objectifs d'épargne et contributions |
+| `budgetPlans` | Plans de financement |
+| `dismissedRecurring` | Mois dont l'utilisateur a fermé les suggestions |
+| `prefCalendarView` | Préférence d'affichage |
 
 ```javascript
-// db.js : initialisation de la base
-const DB_NAME    = 'monbudget-db';
-const DB_VERSION = 1;
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      // Store principal : les transactions
-      const store = db.createObjectStore('transactions', {
-        keyPath:       'id',
-        autoIncrement: true,
-      });
-      store.createIndex('date',     'date',     { unique: false });
-      store.createIndex('category', 'category', { unique: false });
-    };
-
-    request.onsuccess  = () => resolve(request.result);
-    request.onerror    = () => reject(request.error);
-  });
-}
-
-export async function addTransaction(transaction) {
-  const db      = await openDB();
-  const tx      = db.transaction('transactions', 'readwrite');
-  const store   = tx.objectStore('transactions');
-  return store.add({ ...transaction, date: new Date().toISOString() });
-}
+localStorage.setItem('budgetData', JSON.stringify(expenses));
+const expenses = JSON.parse(localStorage.getItem('budgetData') || '[]');
 ```
+
+### Pourquoi j'ai écarté IndexedDB
+
+IndexedDB offre des transactions, des index et une capacité bien supérieure. Deux raisons m'ont fait rester sur `localStorage`.
+
+**Le volume ne le justifie pas.** Un budget personnel tenu sur cinq ans occupe quelques centaines de kilo-octets une fois sérialisé en JSON, loin des 5 Mo que les navigateurs accordent à `localStorage`. La capacité d'IndexedDB répondrait à un problème que l'application n'a pas.
+
+**L'API synchrone garde le rendu simple.** IndexedDB travaille en asynchrone, ce qui aurait fait remonter des `async`/`await` dans toute la couche d'affichage : chaque fonction qui lit une dépense pour la peindre serait devenue asynchrone, et avec elle ses appelantes. `localStorage.getItem()` rend sa valeur dans l'instant, et les fonctions de rendu restent des fonctions ordinaires.
+
+Ce choix a une contrepartie, et elle est sérieuse : `localStorage` se vide avec les données de navigation. L'export CSV n'est pas un confort dans cette architecture, c'est la seule sauvegarde qui existe.
 
 ## Synchronisation en arrière-plan
 
@@ -134,7 +108,7 @@ Le principe : l'app enregistre des "sync events" quand elle est offline. Quand l
 async function scheduleSync(data) {
   const registration = await navigator.serviceWorker.ready;
   await registration.sync.register('sync-transaction');
-  // Stocker data en IndexedDB pour le SW
+  // Persister data pour que le SW la retrouve au réveil
 }
 
 // Dans sw.js
@@ -156,7 +130,7 @@ self.addEventListener('sync', (event) => {
 **Les limites :**
 - **Pas de backup automatique** : si l'utilisateur efface les données du navigateur, tout disparaît. Un export JSON/CSV manuel est indispensable.
 - **Pas de multi-appareils natif** : les données ne se synchronisent pas entre le téléphone et le PC sans une couche serveur.
-- **Support navigateur** : IndexedDB et les Service Workers sont bien supportés, mais le comportement d'installation PWA varie entre Chrome, Safari et Firefox.
+- **Support navigateur** : `localStorage` et les Service Workers sont bien supportés, mais le comportement d'installation PWA varie entre Chrome, Safari et Firefox.
 - **Safari (iOS)** : Apple restreint les notifications push et plusieurs APIs, ce qui ferme la porte à une partie des usages.
 
 ## Conclusion

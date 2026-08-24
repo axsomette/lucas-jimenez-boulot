@@ -6,17 +6,17 @@ tags: ["PHP", "MySQL", "JavaScript", "Jeu web", "Architecture", "Sécurité"]
 draft: false
 ---
 
-Le brief était clair : créer un jeu web interactif pour une opération marketing Planet Boissons, disponible en français et en anglais, avec un système de récompenses distribué sur plusieurs niveaux. L'opération devait générer de la viralité : pour passer au niveau suivant, le joueur devait inviter d'autres personnes par email.
+Planet Boissons voulait un jeu web pour une opération marketing, en français et en anglais, avec des récompenses réparties sur plusieurs niveaux. La viralité était au cœur du dispositif : pour passer au niveau suivant, le joueur devait inviter d'autres personnes par email.
 
-C'est le genre de projet qui paraît simple en surface et qui cache pas mal de complexité dès qu'on commence à réfléchir aux cas limites.
+Le cahier des charges tient en un paragraphe. Les cas limites, eux, ont occupé l'essentiel du développement.
 
 ## Architecture générale
 
-Le jeu repose sur PHP 8 côté serveur et du JavaScript vanilla côté client. Pas de framework frontend : les niveaux sont des pages PHP qui génèrent le HTML dynamiquement selon l'état du joueur. La base de données MySQL stocke les sessions de jeu, la progression par niveau, et les relations d'invitation.
+Le jeu repose sur PHP 8 côté serveur et du JavaScript vanilla côté client. Chaque niveau est une page PHP qui génère son HTML selon l'état du joueur, sans framework frontend. MySQL stocke les sessions de jeu, la progression par niveau et les relations d'invitation.
 
-L'authentification est gérée par sessions PHP. Un joueur s'inscrit, crée un compte, et son identifiant de session est lié à son identifiant en base. Chaque action de jeu vérifie cette correspondance côté serveur.
+Les sessions PHP portent l'authentification. Le joueur s'inscrit, et j'associe son identifiant de session à son identifiant en base. Chaque action de jeu recontrôle cette correspondance côté serveur.
 
-La structure de tables est relativement simple :
+La structure de tables reste courte :
 
 ```sql
 CREATE TABLE game_level_1 (
@@ -56,7 +56,7 @@ canvas.addEventListener('click', (e) => {
 });
 ```
 
-La validation côté serveur est simple : quand tous les objets sont trouvés (ou le temps écoulé), le client envoie une requête POST avec les résultats. Le serveur vérifie que le délai est cohérent (anti-cheat basique : impossible de terminer un niveau 30 secondes en moins de 5 secondes), enregistre le résultat, et retourne le statut.
+Quand le joueur a trouvé tous les objets, ou que le temps s'est écoulé, le client envoie ses résultats en POST. Le serveur contrôle la cohérence du délai, refuse par exemple un niveau de 30 secondes bouclé en 5, enregistre le résultat et renvoie le statut.
 
 ## La mécanique virale
 
@@ -68,21 +68,21 @@ $token = bin2hex(random_bytes(32));
 // Enregistrement en base : sender_id, recipient_email, token, level_unlocked
 ```
 
-Quand le destinataire clique sur le lien, s'inscrit, et complète le niveau 1, l'invitation est marquée comme `accepted`. Quand le joueur expéditeur atteint le nombre requis d'invitations acceptées, le niveau 2 se déverrouille.
+Dès que le destinataire clique sur le lien, s'inscrit et termine le niveau 1, le serveur passe l'invitation en `accepted`. L'expéditeur débloque le niveau 2 quand son compteur d'invitations acceptées atteint le seuil.
 
 Deux problèmes que j'ai rencontrés :
 
-**Les boucles d'invitation.** Rien n'empêche techniquement A d'inviter B, puis B d'inviter A. Les deux se débloqueraient mutuellement. Solution : vérifier que le destinataire n'est pas déjà dans la table `invitations` comme expéditeur ayant invité le joueur courant.
+**Les boucles d'invitation.** Rien n'empêche A d'inviter B, puis B d'inviter A : les deux se débloquent mutuellement sans avoir touché personne d'autre. Je vérifie donc que le destinataire ne figure pas déjà dans la table `invitations` comme expéditeur ayant invité le joueur courant.
 
-**Les faux emails.** Certains joueurs tentaient d'inviter des adresses invalides pour gonfler leur compteur. Solution : validation de format côté serveur (filtre PHP `FILTER_VALIDATE_EMAIL`), plus une vérification que l'email n'a pas déjà été invité par le même joueur dans les dernières 24h.
+**Les faux emails.** Des joueurs ont tenté d'inviter des adresses invalides pour gonfler leur compteur. J'ai ajouté une validation de format côté serveur avec `FILTER_VALIDATE_EMAIL`, doublée d'un contrôle : le même joueur ne peut pas réinviter la même adresse dans les 24 heures.
 
 ## Sécurité et anti-triche
 
-Sur un jeu avec des récompenses réelles (lots distribués), la triche est inévitable. Voici les mesures en place.
+Dès qu'il y a des lots à gagner, quelqu'un tente de tricher. Quatre garde-fous encadrent la progression.
 
-**Validation séquentielle.** Le serveur refuse d'enregistrer la progression d'un niveau si le niveau précédent n'est pas complété. Cette vérification se fait à chaque requête : l'état en session ne suffit pas, on vérifie la base de données.
+**Validation séquentielle.** Le serveur refuse d'enregistrer un niveau tant que le précédent n'est pas terminé, et il relit la base à chaque requête plutôt que de se fier à l'état en session.
 
-**Délai minimum.** Un niveau qui prend normalement 2 minutes ne peut pas être complété en 10 secondes. Le timestamp de début de jeu est stocké en session côté serveur (pas côté client), et on vérifie que la différence est réaliste.
+**Délai minimum.** Un niveau calibré pour 2 minutes ne peut pas tomber en 10 secondes. Je stocke le timestamp de début en session côté serveur, hors de portée du client, et je compare l'écart.
 
 **Rate limiting par IP.** Les inscriptions et les soumissions de score sont limitées à un certain nombre par IP par heure. Ça ne bloque pas un attaquant déterminé, mais ça filtre les tentatives automatisées basiques.
 
@@ -90,7 +90,7 @@ Sur un jeu avec des récompenses réelles (lots distribués), la triche est iné
 
 ## Ce que j'aurais fait différemment
 
-**Le système d'emails.** J'ai utilisé `mail()` de PHP avec un template HTML. Sur certains hébergeurs, les emails envoyés via `mail()` finissent en spam. Un service transactionnel dédié (Mailjet, Brevo) aurait été plus fiable. C'est une erreur que je ne referai pas.
+**Le système d'emails.** J'ai utilisé `mail()` avec un template HTML. Sur certains hébergeurs, ces messages atterrissent en spam, et une invitation en spam casse toute la mécanique virale. Un service transactionnel comme Mailjet ou Brevo aurait tenu la charge.
 
 **La gestion des fuseaux horaires.** L'opération était disponible dans plusieurs pays, mais toutes les dates sont stockées sans timezone en base. Sur une opération aussi courte, ça n'a pas posé de problème réel, mais c'est une dette que j'aurais dû éviter dès le départ.
 
@@ -98,8 +98,8 @@ Sur un jeu avec des récompenses réelles (lots distribués), la triche est iné
 
 ## Ce qui a bien fonctionné
 
-La double langue (FR/EN) a été gérée simplement : deux dossiers `/fr` et `/en`, chacun avec ses propres fichiers PHP incluant les templates traduits. Pas de système i18n complexe. Sur un projet de cette durée de vie, c'était le bon niveau de complexité.
+J'ai traité la double langue avec deux dossiers `/fr` et `/en`, chacun portant ses fichiers PHP et ses templates traduits, plutôt qu'un système i18n complet. Sur un projet de cette durée de vie, l'investissement aurait dépassé le bénéfice.
 
-La mécanique virale a bien fonctionné en termes d'engagement : le fait de devoir inviter des amis pour progresser a généré du partage organique. L'opération a atteint ses objectifs de participation.
+La mécanique virale a produit l'engagement attendu : obliger le joueur à inviter des amis pour progresser a généré du partage organique, et l'opération a atteint ses objectifs de participation.
 
-Et surtout : le jeu a tenu en charge sans problème sur la durée de l'opération. PHP + MySQL bien configuré, c'est robuste, même pour des pics de trafic simultané.
+Le jeu a aussi tenu la charge sur toute la durée de l'opération, pics de trafic compris, sur une pile PHP et MySQL correctement configurée.

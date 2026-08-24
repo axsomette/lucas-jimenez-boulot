@@ -1,18 +1,18 @@
 ---
-title: "PWA Offline-First : Comment MonBudget fonctionne sans serveur"
+title: "PWA offline-first : MonBudget tourne sans serveur"
 date: 2025-08-14
-excerpt: "Construire une Progressive Web App 100% offline avec JavaScript vanilla. Architecture, stockage local, et sync intelligente."
+excerpt: "Construire une Progressive Web App 100% offline en JavaScript vanilla : architecture, stockage local et synchronisation."
 tags: ["PWA", "JavaScript", "Offline-First", "IndexedDB", "Service Worker"]
 draft: false
 ---
 
-MonBudget est une application de gestion de budget personnel qui fonctionne entièrement sans serveur. Zéro backend, zéro base de données distante, zéro connexion requise après l'installation. Voici comment c'est construit et pourquoi cette approche offline-first change la façon de penser le développement web.
+MonBudget gère un budget personnel sans serveur : aucun backend, aucune base distante, et plus aucune connexion requise après l'installation. Je détaille ici l'architecture et ce que l'approche offline-first impose comme ordre de conception.
 
-## Qu'est-ce qu'une PWA, concrètement
+## Ce qu'apporte une PWA
 
 Une Progressive Web App est une application web qui adopte les comportements d'une app native : elle s'installe sur l'écran d'accueil, fonctionne hors ligne, et peut recevoir des notifications push.
 
-La différence avec une app classique : pas de store, pas de binaire à télécharger, pas de compte développeur à 99€/an. L'utilisateur visite le site, voit un bouton "Installer", et c'est fait.
+Face à une app de store, vous économisez le binaire à télécharger et le compte développeur à 99 €/an. L'utilisateur visite le site, voit un bouton « Installer », et c'est fait.
 
 Les trois piliers d'une PWA :
 - **HTTPS** : obligatoire, même en local via `localhost`
@@ -38,7 +38,7 @@ monbudget/
     └── icon-512.png
 ```
 
-L'absence de framework n'est pas un manque : c'est un choix délibéré pour garder le bundle à zéro et forcer une compréhension profonde des APIs web natives.
+J'ai écarté les frameworks pour garder le bundle à zéro et me forcer à connaître les APIs web natives.
 
 ## Service Workers expliqués
 
@@ -71,13 +71,13 @@ self.addEventListener('fetch', (event) => {
 });
 ```
 
-La stratégie ici est **Cache First** : si la ressource est en cache, on la sert directement. Si elle ne l'est pas, on fetch le réseau. Pour une app 100% statique comme MonBudget, c'est optimal.
+La stratégie ici est **Cache First** : le Service Worker sert la ressource depuis le cache, et ne va sur le réseau que s'il ne l'y trouve pas. Pour une app 100% statique comme MonBudget, ça suffit.
 
 ## Stockage local : localStorage vs IndexedDB
 
 ### localStorage
 
-Simple, synchrone, limité à 5-10 Mo, et uniquement pour des chaînes de caractères. Parfait pour des préférences utilisateur ou un token de session. Pas adapté pour des données structurées volumineuses.
+Synchrone, limité à 5-10 Mo, et réservé aux chaînes de caractères. Il convient pour une préférence utilisateur ou un token de session, et décroche dès que les données deviennent structurées et volumineuses.
 
 ```javascript
 localStorage.setItem('theme', 'dark');
@@ -131,7 +131,7 @@ Le principe : l'app enregistre des "sync events" quand elle est offline. Quand l
 
 ```javascript
 // Enregistrement d'un sync event
-async function schedulSync(data) {
+async function scheduleSync(data) {
   const registration = await navigator.serviceWorker.ready;
   await registration.sync.register('sync-transaction');
   // Stocker data en IndexedDB pour le SW
@@ -147,22 +147,22 @@ self.addEventListener('sync', (event) => {
 
 ## Avantages et limitations
 
-**Ce qui marche vraiment bien :**
+**Les gains :**
 - Performances : l'app charge instantanément (tout est en cache)
-- Confidentialité : données uniquement sur le device de l'utilisateur
+- Confidentialité : les données ne quittent pas le device de l'utilisateur
 - Coût : zéro serveur, zéro infrastructure
 - Résilience : fonctionne dans le métro, en avion, n'importe où
 
-**Les vraies limitations :**
+**Les limites :**
 - **Pas de backup automatique** : si l'utilisateur efface les données du navigateur, tout disparaît. Un export JSON/CSV manuel est indispensable.
 - **Pas de multi-appareils natif** : les données ne se synchronisent pas entre le téléphone et le PC sans une couche serveur.
 - **Support navigateur** : IndexedDB et les Service Workers sont bien supportés, mais le comportement d'installation PWA varie entre Chrome, Safari et Firefox.
-- **Safari (iOS)** : les limitations d'Apple sur les PWA sont réelles. Push notifications et certaines APIs restent restreintes.
+- **Safari (iOS)** : Apple restreint les notifications push et plusieurs APIs, ce qui ferme la porte à une partie des usages.
 
 ## Conclusion
 
-L'offline-first change la façon de concevoir une app. Au lieu de partir du serveur et d'ajouter un mode offline comme afterthought, on part du local et on ajoute la connectivité quand elle apporte de la valeur.
+L'offline-first inverse l'ordre de conception. Je pars du stockage local et j'ajoute la connectivité là où elle sert, au lieu de partir du serveur et de greffer un mode dégradé à la fin.
 
-Pour MonBudget, c'est le bon choix : une app de budget n'a pas besoin d'Internet. L'utilisateur veut saisir une dépense rapidement, voir ses graphiques, et partir. Pas de login, pas de latence, pas de problème.
+Pour MonBudget, le calcul tient : une app de budget n'a pas besoin d'Internet. L'utilisateur saisit une dépense, regarde ses graphiques et referme l'application, sans login ni temps de chargement à subir.
 
-Le code source est disponible sur mon GitHub si vous voulez creuser l'implémentation.
+Vous trouverez le code source sur mon GitHub.

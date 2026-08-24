@@ -6,19 +6,19 @@ tags: ["SCSS", "CSS", "Drupal", "BEM", "Architecture Front-End"]
 draft: false
 ---
 
-Le CSS d'un projet Drupal qui a quelques années ressemble souvent à ça : une dizaine de fichiers `style.css`, des sélecteurs avec cinq niveaux de profondeur, des `!important` pour écraser les styles du thème parent, et personne qui sait vraiment ce qu'on peut modifier sans tout casser.
+Le CSS d'un projet Drupal de quelques années suit toujours le même scénario : une dizaine de fichiers `style.css`, des sélecteurs à cinq niveaux de profondeur, des `!important` posés pour écraser le thème parent, et plus personne dans l'équipe capable de dire ce qui casse si on touche à une règle.
 
-J'ai hérité de cette situation plusieurs fois. Voici comment je l'évite maintenant : et comment je restructure quand c'est déjà arrivé.
+J'ai hérité de ce chantier plusieurs fois. J'installe désormais l'architecture ci-dessous dès le premier jour du projet.
 
 ## Pourquoi l'architecture CSS est critique dans Drupal
 
 Drupal génère un balisage HTML complexe. Les modules contrib ajoutent leurs propres classes. Le thème parent (souvent Olivero, Claro, ou Bartik pour les vieux projets) apporte sa feuille de styles. Le thème custom surcharge par-dessus.
 
-Sans structure, on se retrouve vite dans une guerre de spécificité. Sans tokens, on a des valeurs de couleur hardcodées à 15 endroits différents.
+Sans structure, chaque surcharge relance une guerre de spécificité. Sans tokens, la même couleur se retrouve écrite en dur à quinze endroits.
 
 ## La structure que j'utilise
 
-Pour un thème Drupal custom, voici l'arborescence SCSS que j'ai adoptée :
+Pour un thème Drupal custom, j'ai adopté cette arborescence SCSS :
 
 ```
 my_theme/
@@ -81,7 +81,7 @@ $space-unit: 0.25rem; // = 4px
 // Exemples : space(4) = 1rem, space(8) = 2rem
 ```
 
-Pourquoi les SCSS variables ET les CSS custom properties ? Les variables SCSS sont utiles pour les calculs au build. Les custom properties permettent de surcharger au runtime (thème clair/sombre, composants dynamiques).
+Je garde les deux formes pour deux usages distincts : les variables SCSS servent aux calculs pendant le build, les custom properties permettent la surcharge au runtime, pour un thème clair/sombre ou un composant dynamique.
 
 ## BEM pour les composants
 
@@ -140,7 +140,7 @@ BEM (Block-Element-Modifier) donne une convention de nommage qui survit aux rota
 }
 ```
 
-Dans les templates Twig, c'est lisible immédiatement :
+Le template Twig se lit alors sans effort :
 
 ```twig
 <article class="card card--featured">
@@ -156,7 +156,7 @@ Dans les templates Twig, c'est lisible immédiatement :
 
 ## Cascade Layers pour gérer la spécificité
 
-CSS Cascade Layers (disponibles depuis 2022 dans tous les navigateurs modernes) règlent définitivement la guerre de spécificité :
+Les CSS Cascade Layers, disponibles depuis 2022 dans tous les navigateurs modernes, mettent fin à cette guerre de spécificité :
 
 ```scss
 // main.scss
@@ -187,11 +187,11 @@ CSS Cascade Layers (disponibles depuis 2022 dans tous les navigateurs modernes) 
 }
 ```
 
-Une règle dans `utilities` l'emporte toujours sur une règle dans `components`, peu importe la spécificité du sélecteur. Plus besoin de `!important` pour les classes utilitaires.
+Une règle placée dans `utilities` l'emporte sur une règle de `components`, quelle que soit la spécificité du sélecteur. Les classes utilitaires n'ont plus besoin d'un seul `!important`.
 
 ## Surcharger le thème parent proprement
 
-Dans Drupal, on surcharge souvent des styles du thème parent. Avec les layers, ça devient prévisible :
+Un thème Drupal passe son temps à surcharger le thème parent. Les layers rendent le résultat prévisible :
 
 ```scss
 // Thème parent : .node--type-article { padding: 2rem; }
@@ -204,7 +204,7 @@ Dans Drupal, on surcharge souvent des styles du thème parent. Avec les layers, 
 }
 ```
 
-Les styles du thème parent non-layerisés ont une spécificité "entre" les layers. En mettant mes surcharges dans `components`, je m'assure qu'elles prennent le dessus proprement.
+Les styles du thème parent, qui ne sont dans aucun layer, se classent entre les layers déclarés. En posant mes surcharges dans `components`, je leur garantis le dessus sans forcer la spécificité.
 
 ## Intégration avec les libraries Drupal
 
@@ -229,15 +229,15 @@ global-styles:
 }
 ```
 
-Vite peut remplacer Sass directement si le projet utilise déjà un bundler front-end. Pour des projets Drupal qui n'ont pas encore de bundler, Sass CLI reste le choix le plus simple.
+Vite remplace Sass si le projet embarque déjà un bundler front-end. Pour des projets Drupal qui n'ont pas encore de bundler, Sass CLI reste le choix le plus simple.
 
-## Ce que ça change concrètement
+## Les résultats mesurés
 
-Sur un projet de refonte Drupal où j'ai appliqué cette approche sur un codebase existant de ~8000 lignes de CSS :
+Sur une refonte Drupal où j'ai appliqué cette approche à un codebase de 8 000 lignes de CSS :
 
 - Temps pour retrouver le style d'un composant : de 15 minutes à 2 minutes
 - Nombre de `!important` : de 47 à 0
 - Conflits de spécificité lors des mises à jour du thème parent : de fréquents à inexistants
 - Taille du CSS compilé après nettoyage des règles orphelines : -40%
 
-L'architecture CSS n'est pas sexy. C'est exactement pour ça qu'elle est souvent négligée : et que les projets qui l'ont finissent par être beaucoup plus faciles à maintenir.
+Personne ne montre son arborescence SCSS en réunion client, et c'est bien pourquoi ce travail passe à la trappe. Il se paie pourtant à chaque mise à jour du thème parent.

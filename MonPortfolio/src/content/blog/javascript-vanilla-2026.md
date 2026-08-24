@@ -1,32 +1,30 @@
 ---
 title: "JavaScript Vanilla en 2026 : ce que MonBudget m'a appris sur le code sans framework"
 date: 2025-12-18
-excerpt: "J'ai construit MonBudget en JavaScript vanilla, sans React, sans Vue, sans rien. Voici ce que j'ai appris sur les patterns modernes, les vraies limites du sans-framework, et quand c'est le bon choix."
+excerpt: "J'ai construit MonBudget en JavaScript vanilla, sans aucune dépendance front. Les patterns modernes qui tiennent, les limites que j'ai rencontrées, et les cas où ce choix se défend."
 tags: ["JavaScript", "Vanilla JS", "Architecture", "Performance", "No Framework"]
 draft: false
 ---
 
-Quand j'ai commencé MonBudget, j'aurais pu prendre React. Je connais React. C'est ce que j'utilise en production chez Kaneva pour les composants interactifs. Mais pour une PWA de gestion de budget personnel, j'ai fait le choix de zéro dépendance front-end. Vanilla JavaScript, rien d'autre.
-
-Six mois plus tard, voici ce que j'en pense.
+Quand j'ai commencé MonBudget, j'aurais pu prendre React, que j'utilise en production chez Kaneva pour les composants interactifs. J'ai préféré partir sur zéro dépendance front-end, en JavaScript natif. Six mois plus tard, le bilan est nuancé.
 
 ## Pourquoi ce choix au départ
 
-Trois raisons ont guidé la décision :
+Trois raisons ont guidé la décision.
 
-**La nature du projet.** MonBudget est une application offline-first. Le code doit tourner sans réseau. Pas de CDN React, pas de fetch de modules. Tout doit être bundlé localement ou disponible nativement. JavaScript natif = zéro dépendance externe.
+**La nature du projet.** MonBudget est une application offline-first : le code doit tourner sans réseau, donc sans CDN React ni chargement de modules à la volée. Tout doit être bundlé localement ou disponible nativement.
 
-**Apprendre les fondamentaux.** Je voulais confronter directement les APIs natives du navigateur sans l'abstraction d'un framework. IndexedDB, Service Workers, l'API Pointer Events, Intersection Observer : les utiliser directement force une compréhension profonde.
+**Apprendre les fondamentaux.** Je voulais manipuler les APIs natives du navigateur sans l'abstraction d'un framework. IndexedDB, Service Workers, Pointer Events, Intersection Observer : les appeler à la main oblige à comprendre ce qu'elles font.
 
-**La taille du bundle.** Une PWA qui s'installe sur un téléphone doit être légère. React + ReactDOM = ~130 Ko gzippés. Pour une app dont la valeur est dans les données, pas dans l'UI, c'est un coût élevé.
+**La taille du bundle.** Une PWA qui s'installe sur un téléphone doit rester légère. React et ReactDOM pèsent environ 130 Ko gzippés, un prix élevé pour une app dont la valeur tient dans les données plutôt que dans l'interface.
 
 ## Ce que JavaScript moderne rend possible
 
-JavaScript vanilla en 2026, ce n'est plus JavaScript vanilla de 2012. Voici les patterns qui changent tout.
+Le JavaScript natif de 2026 a peu à voir avec celui de 2012. Quatre patterns portent l'essentiel du gain.
 
 ### Modules natifs (ES Modules)
 
-Fini le problème d'organisation du code :
+Les ES Modules règlent l'organisation du code :
 
 ```javascript
 // js/db.js
@@ -55,7 +53,7 @@ import { renderChart } from './charts.js';
 import { syncQueue }   from './sync.js';
 ```
 
-Les modules natifs fonctionnent directement dans le navigateur, sans bundler. Pour la prod, je passe par un petit bundler (Rollup) pour les optimisations, mais ce n'est pas obligatoire.
+Les modules natifs tournent dans le navigateur sans bundler. En production je passe par Rollup pour les optimisations, mais rien ne m'y oblige.
 
 ### Classes et encapsulation
 
@@ -100,11 +98,11 @@ class TransactionForm {
 }
 ```
 
-C'est du React "à la main" : état minimal, rendu déclaratif, cleanup. Mais sans Virtual DOM, sans réconciliation, sans les abstractions qu'on ne contrôle pas.
+C'est du React « à la main » : état minimal, rendu déclaratif et nettoyage. Je perds le Virtual DOM et la réconciliation, et je garde la main sur tout le reste.
 
 ### L'API `FormData` + `Object.fromEntries`
 
-Ce combo est sous-estimé :
+Ce couple m'épargne beaucoup de code :
 
 ```javascript
 const form = document.querySelector('#transaction-form');
@@ -112,7 +110,7 @@ const data = Object.fromEntries(new FormData(form));
 // { amount: "42.50", label: "Courses", category: "food" }
 ```
 
-Plus de `document.querySelector` pour chaque champ. En deux lignes, on récupère un objet propre à envoyer à IndexedDB ou une API.
+Deux lignes remplacent un `document.querySelector` par champ, et rendent un objet prêt à partir vers IndexedDB ou une API.
 
 ### `Proxy` pour la réactivité
 
@@ -141,23 +139,23 @@ const store = createStore(
 store.balance = 150; // Déclenche renderBalance automatiquement
 ```
 
-C'est 20 lignes pour un store réactif basique. Pas Zustand, pas Redux. Pour MonBudget, c'est amplement suffisant.
+Vingt lignes suffisent pour un store réactif de base, là où j'aurais sorti Zustand ou Redux sur un projet plus large. Pour MonBudget, ça couvre le besoin.
 
-## Les vraies limites du vanilla
+## Les limites du vanilla
 
-Je serai honnête : il y a des moments où j'ai regretté de ne pas avoir React.
+À plusieurs moments, j'ai regretté de ne pas avoir React.
 
 **La gestion des formulaires complexes.** Validation, état des champs, messages d'erreur conditionnels : avec React et react-hook-form, c'est 20 lignes. En vanilla, j'ai passé 2h à écrire quelque chose de correct et accessible. Le résultat est bon, mais le coût était élevé.
 
 **Le routage.** MonBudget est une SPA avec 3 vues (Dashboard, Transactions, Paramètres). Le routage vanilla via l'API History fonctionne, mais il fallait tout gérer : transitions, gestion du bouton retour, état entre les vues. React Router fait ça natif.
 
-**La maintenabilité sur la durée.** Les patterns maison de "composants" fonctionnent, mais ils ne sont pas standardisés. Un développeur qui rejoint le projet doit apprendre la convention locale, pas une API documentée.
+**La maintenabilité sur la durée.** Mes patterns maison de « composants » fonctionnent, mais ils n'existent que chez moi. Un développeur qui rejoint le projet doit apprendre ma convention locale au lieu d'ouvrir une documentation.
 
-**Les animations complexes.** Pour des transitions de vues ou des animations d'entrée sophistiquées, GSAP ou Motion One valent mieux que du CSS + vanilla JS. J'ai finalement ajouté Motion One (3 Ko gzippé), ce qui casse un peu le purisme mais améliore l'expérience.
+**Les animations complexes.** Sur des transitions de vues ou des animations d'entrée travaillées, GSAP et Motion One battent le duo CSS + vanilla JS. J'ai fini par ajouter Motion One, 3 Ko gzippés, au prix du purisme affiché au départ.
 
 ## Quand choisir vanilla JS en 2026
 
-La réponse courte : rarement pour une app, souvent pour une lib ou un composant isolé.
+Le vanilla se défend rarement sur une application entière, souvent sur une bibliothèque ou un composant isolé.
 
 **Bon choix :**
 - PWA offline-first avec contraintes de bundle
@@ -170,17 +168,17 @@ La réponse courte : rarement pour une app, souvent pour une lib ou un composant
 - Application avec des douzaines de vues et d'états
 - Équipe de plusieurs développeurs (la standardisation de React est précieuse)
 - Formulaires complexes avec validation
-- Application qui va grossir significativement
+- Application appelée à grossir
 
 ## Ce que j'emporte
 
-Construire MonBudget en vanilla m'a forcé à comprendre des choses que React cache :
+Construire MonBudget en vanilla m'a obligé à regarder ce que React masque :
 
-- Comment fonctionne vraiment la réconciliation du DOM
-- Ce que coûte réellement une mise à jour du DOM
-- Comment IndexedDB gère les transactions et la concurrence
-- Pourquoi le Virtual DOM existe (et ce qu'on perd sans lui)
+- La mécanique de la réconciliation du DOM
+- Le coût réel d'une mise à jour du DOM
+- La façon dont IndexedDB gère les transactions et la concurrence
+- La raison d'être du Virtual DOM, et ce qu'on perd sans lui
 
-Ces connaissances me rendent meilleur développeur React. Comprendre ce qui est sous l'abstraction, c'est savoir quand l'abstraction ne suffit plus.
+J'en suis ressorti meilleur développeur React, parce que je sais maintenant à quel moment l'abstraction cesse de suffire.
 
-MonBudget restera en vanilla. Pour de nouveaux projets de cette nature, je ferais le même choix. Pour le reste, React reste mon outil de travail quotidien : et je l'apprécie mieux depuis que je sais ce qu'il fait à ma place.
+MonBudget restera en vanilla, et je referais le même choix sur un projet de cette nature. Pour le reste, React reste mon outil de travail quotidien.

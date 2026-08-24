@@ -1,14 +1,12 @@
 ---
 title: "PHP MVC from scratch : ce que ça apprend qu'un framework ne montre pas"
 date: 2026-01-20
-excerpt: "Pour le jeu Tir au But de Planet Boissons, j'ai construit un routeur MVC PHP sans framework. Router, controllers, sessions, API REST : voici ce que ce choix m'a appris sur ce que Laravel fait pour vous sans que vous le sachiez."
+excerpt: "Pour le jeu Tir au But de Planet Boissons, j'ai construit un MVC PHP sans framework. Routeur, controllers, sessions et API REST : ce que Laravel prend en charge à votre place, et qu'on ne voit qu'en s'en passant."
 tags: ["PHP", "MVC", "Architecture", "MySQL", "API REST", "Sécurité"]
 draft: false
 ---
 
-Pour le développement du jeu Tir au But — une simulation de penalty en ligne avec leaderboard pour une opération marketing Planet Boissons — j'ai fait le choix de ne pas utiliser de framework PHP. Pas par dogmatisme anti-framework : Laravel et Symfony sont d'excellents outils. Mais le contexte s'y prêtait : hébergement mutualisé Apache, durée de vie limitée, complexité métier modérée. Un framework complet aurait été surdimensionné.
-
-Voici ce que j'ai construit, et ce que ça m'a appris.
+Tir au But est une simulation de penalty en ligne avec leaderboard, développée pour une opération marketing Planet Boissons. J'ai écarté les frameworks PHP sur ce projet, alors que Laravel et Symfony restent d'excellents outils : l'hébergement était un mutualisé Apache, la durée de vie du jeu limitée et la complexité métier modérée. Un framework complet aurait pesé plus lourd que le jeu lui-même.
 
 ## Le routeur
 
@@ -39,7 +37,7 @@ match($page) {
 };
 ```
 
-Simple, lisible, maintenable. Aucune magie.
+Le dispatch se relit d'un bloc, sans documentation ni couche d'indirection.
 
 ## Les controllers
 
@@ -69,7 +67,7 @@ class GameController {
 
 Le jeu est une simulation de tir au but : 30 secondes, des cibles qui apparaissent, des points selon la zone touchée. Centro (centre du but) = 1 point, côtés = 2 points, lucarne (coin supérieur) = 3 points.
 
-La validation du score côté serveur est critique sur un jeu avec un classement public. Si le score venait uniquement du client JavaScript, n'importe qui pourrait envoyer `score=99999` via une requête HTTP. La solution : le serveur calcule le score maximum théorique selon la durée et le cadence des cibles, et refuse tout score supérieur.
+Sur un jeu à classement public, le serveur doit valider le score. Si le client JavaScript en était seul juge, n'importe qui enverrait `score=99999` par une requête HTTP. Le serveur calcule donc le score maximum théorique d'après la durée et la cadence des cibles, et rejette tout ce qui dépasse.
 
 ```php
 function validateScore(int $score, int $duration, int $targetCount): bool {
@@ -78,7 +76,7 @@ function validateScore(int $score, int $duration, int $targetCount): bool {
 }
 ```
 
-Les actions individuelles (chaque clic sur une cible) sont envoyées en temps réel via des requêtes POST à une API dédiée, qui les enregistre et les valide avant d'incrémenter le score en session. Le score final n'est que la somme de ces actions individuelles, jamais une valeur envoyée directement par le client.
+Chaque clic sur une cible part en temps réel vers une API dédiée par une requête POST. L'API l'enregistre, le valide, puis incrémente le score en session. Le score final n'est que la somme de ces actions, et jamais une valeur transmise telle quelle par le client.
 
 ## L'API REST maison
 
@@ -108,18 +106,18 @@ if (!$token || $token !== $_SESSION['csrf_token']) {
 
 Le token CSRF est généré à l'initialisation de la session et inclus dans le HTML de la page de jeu. Chaque requête API le renvoie dans le corps de la requête. Sans ce token, la requête est rejetée.
 
-## Ce qu'on apprend en ne faisant pas appel à un framework
+## Ce que le framework prend en charge à votre place
 
 **La gestion des sessions PHP est moins transparente qu'il y paraît.** `session_start()` tout au début de chaque script, `session_regenerate_id(true)` après une authentification pour prévenir la fixation de session, `session_destroy()` pour une déconnexion propre. Ce sont des détails que Laravel gère pour vous sans que vous y pensiez. Quand vous les faites vous-même, vous comprenez pourquoi ils sont là.
 
-**Les headers HTTP doivent être envoyés avant tout output.** Une erreur de débutant que tout le monde fait : un `echo` ou un `var_dump` avant un `header('Location: ...')` génère une erreur "headers already sent". Sans framework, ça arrive régulièrement. Avec un framework, le système de templates et les réponses encapsulées empêchent ça structurellement.
+**Les headers HTTP partent avant tout output.** Un `echo` ou un `var_dump` glissé avant un `header('Location: ...')` déclenche le fameux « headers already sent ». Sans framework, je me suis fait piéger plusieurs fois. Avec un framework, le système de templates et les réponses encapsulées rendent l'erreur impossible.
 
 **La protection CSRF n'est pas automatique.** Sur un formulaire, n'importe quel site peut faire soumettre votre formulaire par un utilisateur connecté via une requête cross-origin. Le token CSRF brise cette attaque : sans le token, la requête est rejetée. Laravel le gère avec le middleware VerifyCsrfToken. Sans framework, vous devez y penser vous-même.
 
-**La connexion à la base de données est une ressource partagée.** En PHP, chaque requête HTTP est un processus distinct qui ouvre sa propre connexion MySQL. Pas de pool de connexions natif comme en Node.js ou dans un serveur Java. PDO `new PDO(...)` à chaque requête : c'est correct, mais il faut comprendre pourquoi et ne pas oublier de fermer les connexions.
+**La connexion à la base de données est une ressource partagée.** En PHP, chaque requête HTTP est un processus distinct qui ouvre sa propre connexion MySQL. Pas de pool de connexions natif comme en Node.js ou dans un serveur Java. Un `new PDO(...)` à chaque requête reste correct, à condition de savoir pourquoi et de fermer les connexions derrière soi.
 
 ## Verdict
 
-Construire un MVC PHP from scratch sur un projet réel est un exercice formateur. On comprend ce que font les frameworks, pourquoi ils font ces choix, et ce qu'ils protègent. Ce n'est pas une raison de le faire systématiquement : Laravel est plus productif, plus sécurisé par défaut, et mieux maintenu que n'importe quelle solution maison.
+Écrire un MVC PHP de zéro sur un projet réel apprend ce que les frameworks font, et surtout ce qu'ils protègent. Ça ne justifie pas de recommencer à chaque fois : Laravel reste plus productif et mieux sécurisé par défaut qu'une solution maison, et une équipe le maintient à ma place.
 
-Mais sur un hébergement mutualisé, pour une opération de quelques semaines, avec des contraintes d'environnement qui excluent Composer et les dépendances lourdes, PHP vanilla bien structuré reste une option viable. À condition de ne pas se raconter d'histoires sur la maintenance long terme.
+Sur un hébergement mutualisé, pour une opération de quelques semaines, avec un environnement qui exclut Composer et les dépendances lourdes, du PHP vanilla bien structuré fait le travail. Je ne le proposerais pas pour une application qu'il faudra maintenir cinq ans.

@@ -1,34 +1,34 @@
 ---
 title: "Drupal + Claude AI : Automatiser la gestion de contenu avec les LLMs"
 date: 2025-09-04
-excerpt: "Intégrer Claude API dans Drupal pour l'automation de contenu. Cas d'usage, architecture, et code example."
+excerpt: "Intégrer l'API Claude dans Drupal pour automatiser la saisie de contenu : cas d'usage, architecture du module et code."
 tags: ["Drupal", "PHP", "Intelligence Artificielle", "Claude API", "Automation"]
 draft: false
 ---
 
-Drupal gère du contenu. Les LLMs génèrent, analysent, et enrichissent du contenu. Leur combinaison ouvre des cas d'usage concrets pour les équipes éditoriales et les agences web. Voici comment j'ai intégré Claude API dans un projet Drupal, et ce que ça change vraiment dans la pratique.
+Drupal stocke du contenu, les LLMs en produisent et en analysent. Les brancher ensemble ouvre des usages concrets pour une équipe éditoriale. Je détaille ici l'intégration de l'API Claude dans un projet Drupal et ce qu'elle a changé au quotidien des rédacteurs.
 
-## Contexte : pourquoi l'AI pour Drupal
+## Pourquoi brancher un LLM sur Drupal
 
 Les CMS comme Drupal ont un problème récurrent : la saisie de contenu est fastidieuse. Un rédacteur qui publie 20 articles par semaine passe un temps considérable sur des tâches répétitives : rédiger des meta descriptions, créer des résumés, standardiser des formats, traduire des bribes de texte.
 
-Les LLMs ne remplacent pas le rédacteur. Mais ils peuvent absorber la partie mécanique et laisser le rédacteur se concentrer sur la valeur ajoutée : l'expertise, l'angle éditorial, les sources.
+Un LLM absorbe cette part mécanique et rend au rédacteur le temps qu'il mettra dans son angle éditorial et ses sources. Il ne le remplace nulle part ailleurs.
 
 ## Cas d'usage réalistes
 
-Avant de coder quoi que ce soit, voici ce qui vaut vraiment la peine d'automatiser dans un contexte Drupal :
+Cinq tâches justifient l'effort d'intégration dans un contexte Drupal.
 
 **Génération de meta description**
-À partir du body d'un article, générer une meta description SEO-optimisée de 155 caractères. Gain de temps réel, qualité constante.
+À partir du body d'un article, produire une meta description SEO de 155 caractères, avec une qualité qui ne dépend plus de la fatigue du rédacteur.
 
 **Résumé automatique**
-Produire un excerpt de 2-3 phrases pour le listing d'articles, sans que l'éditeur ait à le rédiger manuellement.
+Produire un excerpt de 2 à 3 phrases pour le listing d'articles, que l'éditeur n'a plus à rédiger.
 
 **Suggestion de tags**
 Analyser le contenu et proposer des termes de taxonomy pertinents parmi les termes existants dans Drupal.
 
 **Détection de langue**
-Pour les sites multilingues, identifier automatiquement la langue du contenu soumis et router vers la traduction adéquate.
+Sur un site multilingue, identifier la langue du contenu soumis et le router vers la bonne traduction.
 
 **Validation de contenu**
 Vérifier la conformité d'un article à une charte éditoriale : longueur minimale, présence de liens internes, ton approprié.
@@ -179,18 +179,18 @@ function ai_content_helper_node_presave(NodeInterface $node): void {
 Intégrer un LLM dans un CMS soulève des questions légitimes :
 
 **Transparence**
-Les contenus générés ou enrichis par AI doivent être identifiables. Dans le module, on ajoute un champ booléen `field_ai_assisted` pour tracker quels contenus ont été touchés par le modèle.
+Un lecteur doit pouvoir savoir qu'un contenu a été enrichi par un modèle. Le module ajoute un champ booléen `field_ai_assisted` qui marque les contenus concernés.
 
 **Contrôle éditorial**
-L'AI génère, l'humain valide. Le module n'auto-publie jamais. Les suggestions vont dans des champs que l'éditeur peut modifier ou effacer avant publication.
+Le module ne publie jamais de lui-même. Il dépose ses suggestions dans des champs que l'éditeur relit, modifie ou vide avant publication.
 
 **Coût et volume**
-Claude Haiku est économique (quelques centimes pour des milliers d'appels), mais il faut monitorer le volume. Un hook `hook_node_presave` qui tire pour chaque sauvegarde peut générer des coûts inattendus si l'éditeur sauvegarde 50 fois un même article.
+Claude Haiku coûte quelques centimes pour des milliers d'appels, mais le volume se surveille. Un `hook_node_presave` qui part à chaque sauvegarde facture 50 appels si l'éditeur enregistre 50 fois le même article.
 
 Solution : ajout d'un flag "déjà généré" et limitation au `isNew()` ou à une action explicite de l'éditeur via un bouton custom.
 
 **Hallucinations**
-Les LLMs inventent parfois. Pour une meta description ou un résumé, le risque est limité (on part du vrai texte). Pour une vérification de faits ou une génération de contenu brut, le contrôle humain est indispensable.
+Un LLM invente. Sur une meta description ou un résumé le risque reste faible, puisque le modèle part du texte réel. Sur une vérification de faits ou une génération de contenu à partir de rien, un humain doit relire.
 
 ## Futur
 
@@ -200,11 +200,11 @@ Les APIs de LLMs évoluent vite. Quelques directions qui me semblent prometteuse
 Remplacer ou augmenter la recherche full-text native avec une recherche sémantique basée sur des embeddings vectoriels. L'utilisateur cherche "facture impayée" et trouve des articles sur "recouvrement" même si le mot n'y est pas.
 
 **Génération d'images alt text**
-Via une API multimodale (Claude prend des images en entrée), générer automatiquement des textes alternatifs descriptifs pour les images uploadées dans Drupal.
+Via une API multimodale, Claude accepte des images en entrée et peut décrire les visuels uploadés dans Drupal pour en tirer un texte alternatif.
 
 **Classification automatique de contenu**
-Tagger automatiquement les contenus entrants dans un workflow de publication multi-auteurs, réduisant la charge des modérateurs.
+Étiqueter les contenus entrants dans un workflow de publication multi-auteurs, ce qui allège la file des modérateurs.
 
-L'idée n'est pas de remplacer les équipes éditoriales, mais de leur donner des outils qui absorbent la charge répétitive. Sur les projets où je l'ai testé, le gain de temps sur la saisie de métadonnées seul justifie l'intégration.
+Ces outils rendent du temps aux équipes éditoriales sur la part répétitive du travail. Sur les projets où je les ai testés, le temps récupéré sur la seule saisie des métadonnées paie déjà l'intégration.
 
-Des questions sur l'architecture ou l'implémentation ? N'hésitez pas à me contacter sur LinkedIn.
+Écrivez-moi sur LinkedIn si vous voulez le détail de l'architecture.

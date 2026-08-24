@@ -21,8 +21,8 @@ const sortedProjects = allProjects.sort((a, b) => {
       <span class="section-label">Réalisations</span>
       <h2 class="section-title">Mes projets</h2>
       <p class="section-subtitle">
-        Quelques projets sur lesquels j'ai travaillé : des applications web complètes,
-        des outils internes, chaque projet est une occasion d'apprendre.
+        Des sites institutionnels sous Drupal et des applications métier sur mesure.
+        Chaque fiche indique la stack et renvoie au site quand il est en ligne.
       </p>
     </header>
 
@@ -108,6 +108,17 @@ const sortedProjects = allProjects.sort((a, b) => {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
     gap: var(--space-6);
     margin-bottom: var(--space-12);
+  }
+
+  /*
+    En desktop, `auto-fill` retombait à deux colonnes : la largeur utile
+    plafonne à 1040px (container 1120px moins 2×40px de padding) alors que
+    trois pistes de 340px plus deux gouttières de 24px en réclament 1068.
+    Il manquait 28px. On impose donc les trois colonnes au-delà de 1080px,
+    où chaque carte dispose encore d'environ 317px.
+  */
+  @media (min-width: 1080px) {
+    .projects__grid { grid-template-columns: repeat(3, 1fr); }
   }
 
   /* Items masqués lors du filtrage */

@@ -20,7 +20,8 @@ function formatPeriod(start: Date, end?: Date, current?: boolean): string {
   const opts: Intl.DateTimeFormatOptions = { month: 'short', year: 'numeric' };
   const from = start.toLocaleDateString('fr-FR', opts);
   const to = current ? "aujourd'hui" : end ? end.toLocaleDateString('fr-FR', opts) : '';
-  return `${from} — ${to}`;
+  // Demi-cadratin (–) et non cadratin (—) : c'est le caractère des plages.
+  return `${from} – ${to}`;
 }
 
 function durationMonths(start: Date, end?: Date): string {
@@ -44,11 +45,10 @@ function durationMonths(start: Date, end?: Date): string {
       <span class="section-label">Parcours</span>
       <h2 class="section-title">Expérience</h2>
       <p class="section-subtitle">
-        Depuis 2022, j'ai eu l'occasion de travailler sur des projets très différents :
-        des applications métier, des sites vitrine, des outils internes. Ce qui m'a le plus
-        appris, c'est de devoir m'adapter à chaque contexte : une stack existante à reprendre,
-        une équipe à rejoindre, des contraintes techniques à comprendre vite. C'est ce
-        terrain-là qui m'a construit autant que la technique elle-même.
+        Depuis 2022, j'interviens sur des applications métier et des sites vitrine,
+        le plus souvent sur une stack que je n'ai pas choisie. Reprendre le code d'un
+        autre, en comprendre les contraintes et livrer sans rien casser occupe
+        l'essentiel de mon travail.
       </p>
     </header>
 

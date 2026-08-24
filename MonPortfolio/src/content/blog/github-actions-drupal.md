@@ -6,11 +6,9 @@ tags: ["GitHub Actions", "CI/CD", "Drupal", "DevOps", "Linux"]
 draft: false
 ---
 
-Avant d'avoir un pipeline CI/CD, déployer Drupal ça ressemblait à ça : SSH dans le serveur, `git pull`, `composer install`, `drush cr`, `drush updb`, croiser les doigts. Parfois ça marchait. Parfois un module se comportait différemment en prod et on passait l'après-midi à déboguer.
+Avant le pipeline, je déployais Drupal en SSH : `git pull`, `composer install`, `drush cr`, `drush updb`, puis j'attendais de voir. Il arrivait qu'un module se comporte autrement en production, et j'y passais l'après-midi.
 
-Maintenant, un `git push` sur `main` déclenche un pipeline automatique. Les erreurs sont détectées avant que le code atteigne le serveur. Et si quelque chose part en vrille, le rollback est documenté.
-
-Voici comment c'est construit.
+Aujourd'hui, un `git push` sur `main` lance le pipeline. Les linters attrapent les erreurs avant que le code touche le serveur, et je dispose d'une procédure de rollback écrite.
 
 ## Architecture du pipeline
 
@@ -196,7 +194,7 @@ Dans **Settings > Secrets and variables > Actions** du repo :
 
 ## Le cas multisite
 
-Sur la plateforme 22 instances, le pipeline est légèrement différent. Un seul codebase, mais chaque site a sa propre configuration et base de données. Le `drush updb` et `drush config:import` doivent être exécutés pour chaque site :
+Sur la plateforme à 22 instances, le pipeline change sur un point. Le codebase est unique, mais chaque site porte sa configuration et sa base. Je rejoue donc `drush updb` et `drush config:import` site par site :
 
 ```bash
 # Post-déploiement multisite
@@ -210,7 +208,7 @@ for site in "${SITES[@]}"; do
 done
 ```
 
-Dans GitHub Actions, ce bloc est dans une étape `matrix` pour paralléliser :
+Une étape `matrix` parallélise ce bloc dans GitHub Actions :
 
 ```yaml
 strategy:
@@ -220,7 +218,7 @@ strategy:
 
 ## Rollback
 
-Le pipeline n'a pas encore de rollback automatique (c'est sur ma liste). En attendant, le rollback manuel est documenté :
+Le pipeline ne sait pas encore revenir en arrière tout seul, et c'est la prochaine chose que j'y ajouterai. En attendant, je suis cette procédure manuelle :
 
 ```bash
 # Sur le serveur
@@ -232,12 +230,10 @@ vendor/bin/drush updb -y
 vendor/bin/drush cr
 ```
 
-Pour un rollback de base de données, j'ai un cron qui tourne toutes les 6h et exporte un dump SQL vers un bucket S3. Avant chaque déploiement en production, un dump manuel est déclenché comme filet de sécurité supplémentaire.
+Côté base de données, un cron exporte un dump SQL vers un bucket S3 toutes les 6 heures. Je déclenche en plus un dump manuel juste avant chaque déploiement en production.
 
 ## Ce que ça change
 
-Le bénéfice le plus immédiat n'est pas le gain de temps sur les déploiements. C'est la **confiance**. Savoir que le code qui atteint la prod a passé les linters, que les assets sont bien buildés, que `drush updb` s'est exécuté sans erreur : ça change la psychologie du déploiement.
+Le gain de temps compte moins que la **confiance**. Le code qui arrive en production a passé les linters, ses assets sont compilés et `drush updb` s'est exécuté sans erreur. Un pipeline vert vaut désormais feu vert, là où je relisais chaque étape à la main.
 
-On passe de "j'espère que ça va marcher" à "si le pipeline est vert, c'est bon".
-
-Le deuxième bénéfice, c'est la documentation implicite. Un nouveau développeur qui rejoint le projet peut lire le fichier YAML et comprendre exactement ce qui se passe à chaque déploiement. C'est mieux que n'importe quel wiki.
+Le fichier YAML sert aussi de documentation. Un développeur qui rejoint le projet y lit la séquence exacte de chaque déploiement, là où un wiki aurait déjà divergé du réel.

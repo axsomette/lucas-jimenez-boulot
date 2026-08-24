@@ -1,16 +1,16 @@
 ---
 title: "Drupal 9→11 : Migration réussie d'une plateforme 22 instances"
 date: 2025-07-22
-excerpt: "Retour d'expérience sur la migration d'une plateforme Drupal multisite complexe. Lessons learned, solutions, et pièges à éviter."
+excerpt: "Retour d'expérience sur la migration d'une plateforme Drupal multisite de 22 instances : les modules qui ont bloqué, la stratégie en quatre phases et les pièges à éviter."
 tags: ["Drupal", "PHP", "Migration", "Multisite", "DevOps"]
 draft: false
 ---
 
-Migrer une plateforme Drupal multisite avec 22 instances vers Drupal 11 : ça ressemble à un projet bien balisé sur le papier. En pratique, c'est une accumulation de décisions techniques, de modules cassés, et de surprises en prod. Voici ce que j'ai appris.
+Sur le papier, migrer une plateforme Drupal multisite de 22 instances vers Drupal 11 ressemble à un chantier balisé. En pratique, j'y ai passé quatre mois entre modules incompatibles, arbitrages techniques et surprises en production.
 
 ## Pourquoi c'est aussi complexe
 
-Une instance Drupal, ça se migre. Vingt-deux instances qui partagent un même codebase, des configurations différentes, des modules surcharges, et des données clients hétérogènes, c'est une autre histoire.
+Migrer une instance Drupal reste une opération connue. Vingt-deux instances qui partagent un codebase mais divergent par leurs configurations, leurs surcharges de modules et leurs données clients posent un problème d'une autre nature.
 
 Les défis principaux :
 
@@ -19,7 +19,7 @@ Les défis principaux :
 - **Données en production** : pas question de casser une base de données active
 - **Pas de downtime acceptable** : les sites servent du trafic quotidien
 
-L'objectif n'était pas seulement de "faire tourner" Drupal 11. C'était d'avoir une plateforme stable, maintenable, et prête pour les années à venir.
+Je visais une plateforme stable et maintenable dans la durée, au-delà du simple fait de démarrer sous Drupal 11.
 
 ## Architecture initiale
 
@@ -44,19 +44,19 @@ Chaque site avait sa propre base de données, ses propres fichiers uploadés, et
 
 ### Better Exposed Filters (BEF)
 
-`better_exposed_filters` avait des incompatibilités avec les vues complexes qu'on avait en place. Plusieurs vues utilisaient des filtres exposés avec des comportements custom. Solution : réécriture des handlers concernés avec l'API Views native de Drupal 11.
+`better_exposed_filters` cassait sur les vues complexes déjà en place, dont plusieurs utilisaient des filtres exposés au comportement custom. J'ai réécrit les handlers concernés avec l'API Views native de Drupal 11.
 
 ### Geolocation Field
 
-Le module `geolocation` avait changé son API entre D9 et D11. Les champs existants stockaient des données dans un format légèrement différent. On a écrit une migration custom via `hook_update_N()` pour normaliser les données existantes sans perdre les coordonnées.
+Le module `geolocation` a changé son API entre D9 et D11, et les champs existants stockaient les données dans un format différent. J'ai écrit une migration custom via `hook_update_N()` pour normaliser l'existant sans perdre les coordonnées.
 
 ### Hooks dépréciés
 
-Drupal 11 a supprimé plusieurs hooks qui étaient encore disponibles en D9/D10. La commande `drush analyze:deprecations` (via `drupal-check`) a été notre meilleure alliée pour identifier les 200+ dépréciations à corriger dans les modules custom.
+Drupal 11 a supprimé plusieurs hooks encore disponibles en D9 et D10. `drush analyze:deprecations`, via `drupal-check`, a sorti les quelque 200 dépréciations à corriger dans les modules custom.
 
 ## La stratégie de migration
 
-On a découpé la migration en 4 phases :
+J'ai découpé la migration en 4 phases.
 
 **Phase 1 : préparation du codebase**
 - Mise à jour Drupal 10 d'abord (D9 → D10 est plus simple que D9 → D11 direct)
@@ -81,7 +81,7 @@ On a découpé la migration en 4 phases :
 
 ## Solutions clés
 
-La clé du succès a été la **combinaison d'outils** :
+Trois commandes ont porté l'essentiel du travail :
 
 ```bash
 # Détection précoce des problèmes
@@ -94,23 +94,23 @@ drush config:import --diff
 drush status && drush cr && drush updb -y
 ```
 
-Et surtout : des environnements de staging fidèles à la prod, avec des données réelles anonymisées.
+Le staging comptait autant que l'outillage : des environnements fidèles à la production, alimentés par des données réelles anonymisées.
 
-## Recommandations pour toi qui lis ça
+## Six recommandations
 
-Si tu t'attaques à une migration similaire :
+Si vous vous attaquez à une migration comparable :
 
-1. **Commence par D10, pas D11 direct.** Le chemin D9→D10→D11 est plus sûr et mieux documenté.
-2. **Lance `drupal-check` dès maintenant.** N'attends pas la veille de la migration pour découvrir tes 300 dépréciations.
-3. **Isole les modules critiques.** Purge, Webform, Search API, Paragraphs : vérifie leur compatibilité en premier.
-4. **Prépare un rollback plan.** Un snapshot de base de données avant chaque déploiement. Toujours.
-5. **Teste avec de vraies données.** Les migrations de données sont souvent le point de défaillance silencieux.
-6. **Planifie la communication.** Tes clients / utilisateurs méritent d'être prévenus si un service peut être perturbé.
+1. **Passez par D10 avant D11.** Le chemin D9→D10→D11 est mieux documenté que le saut direct.
+2. **Lancez `drupal-check` maintenant.** Découvrir deux cents dépréciations la veille du déploiement coûte bien plus cher que de les traiter au fil de l'eau.
+3. **Traitez les modules critiques en premier.** Purge, Webform, Search API et Paragraphs conditionnent tout le reste.
+4. **Préparez un plan de rollback.** Un snapshot de base de données avant chaque déploiement, sans exception.
+5. **Testez avec de vraies données.** Les migrations de données cassent en silence, et le staging vide ne le montre pas.
+6. **Prévenez les clients.** Ils méritent de savoir qu'un service peut être perturbé.
 
 ## Conclusion
 
-La migration s'est faite sur 4 mois, avec une équipe réduite. Pas d'incident majeur en production. Ce qui a fait la différence : une approche progressive, des outils d'analyse intégrés dans le workflow dès le début, et une documentation rigoureuse à chaque étape.
+La migration a duré 4 mois avec une équipe réduite, sans incident majeur en production. Le déploiement par vagues, l'analyse statique branchée dès le premier jour et la documentation tenue à chaque étape expliquent ce résultat.
 
-Drupal 11 apporte des améliorations réelles, notamment sur les performances de rendu et l'API Recipes. L'investissement de la migration vaut le coup, à condition de ne pas la précipiter.
+Drupal 11 apporte de vrais gains sur les performances de rendu et l'API Recipes. La migration se rentabilise, à condition de ne pas la précipiter.
 
-Des questions sur un point spécifique ? N'hésitez pas à me contacter sur LinkedIn.
+Écrivez-moi sur LinkedIn si vous voulez le détail d'un point précis.

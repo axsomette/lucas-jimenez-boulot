@@ -5,6 +5,7 @@ const navLinks = [
   { href: `${base}/#projets`,    label: 'Projets'    },
   { href: `${base}/#experience`, label: 'Expérience' },
   { href: `${base}/#apropos`,    label: 'À propos'   },
+  { href: `${base}/#ia`,         label: 'IA'         },
   { href: `${base}/blog`,        label: 'Blog', external: true },
 ];
 ---
@@ -12,7 +13,7 @@ const navLinks = [
 <header class="nav" role="banner">
   <div class="container nav__inner">
 
-    <a href={import.meta.env.BASE_URL} class="nav__logo" aria-label="Lucas Jimenez Boulot — Accueil">
+    <a href={import.meta.env.BASE_URL} class="nav__logo" aria-label="Lucas Jimenez Boulot, accueil">
       <img
         src={`${import.meta.env.BASE_URL}/profile.jpeg`}
         alt=""

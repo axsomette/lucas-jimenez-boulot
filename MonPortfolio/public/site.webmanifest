@@ -1,0 +1,14 @@
+{
+  "name": "Lucas Jimenez Boulot · Développeur full-stack",
+  "short_name": "LJB",
+  "start_url": "/lucas-jimenez-boulot/",
+  "scope": "/lucas-jimenez-boulot/",
+  "display": "browser",
+  "background_color": "#0B1020",
+  "theme_color": "#0B1020",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,6 +1,7 @@
 ---
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Mark from '../components/ui/Mark.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -10,37 +11,55 @@ interface Props {
   ogType?: string;
   publishedTime?: string;
   articleTags?: string[];
+  /** Joue l'animation de chargement du logo (accueil uniquement, une fois par session) */
+  boot?: boolean;
 }
 
 const {
   title = 'Lucas Jimenez Boulot · Développeur Full-Stack à Montpellier',
   description = 'Développeur Full-Stack basé à Montpellier. Je conçois et développe des applications web performantes de bout en bout.',
-  ogImage = 'profile.jpeg',
+  ogImage = 'og-image.png',
   ogType = 'website',
   publishedTime,
   articleTags,
+  boot = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // Compute absolute og:image URL — strip leading slash so new URL() resolves relative to site (which includes base)
 const ogImageURL = new URL(ogImage.replace(/^\//, ''), Astro.site);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const fontsURL = 'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap';
 ---
 
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class:list={[{ 'has-boot': boot }]}>
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Ordre des cascade layers, posé AVANT toute feuille de style : un layer prend son rang à sa première
+      apparition, et les styles des composants peuvent être injectés avant global.css. Sans cette ligne,
+      @layer components peut passer sous @layer reset et perdre ses marges et paddings.
+    -->
+    <style is:inline>@layer reset, base, layout, components, utilities;</style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--
-      Script synchrone — s'exécute AVANT le premier rendu du navigateur.
-      Ajoute la classe .js sur <html> pour que le CSS puisse masquer
-      les éléments .reveal uniquement quand JS est disponible.
-      Sans ça, les utilisateurs sans JS (ou en cas de chargement lent)
-      voient une page noire pendant le chargement des animations.
+      Script synchrone — s'exécute AVANT le premier rendu.
+      Le chargement du logo ne se joue qu'à la première visite de la session :
+      ensuite .boot-seen le masque et retire le délai d'entrée du titre.
+      Sans JS (ou sessionStorage bloqué), il se joue à chaque fois, ce qui reste correct.
     -->
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      try {
+        const root = document.documentElement;
+        if (root.classList.contains('has-boot')) {
+          if (sessionStorage.getItem('ljb-boot')) root.classList.add('boot-seen');
+          else sessionStorage.setItem('ljb-boot', '1');
+        }
+      } catch (e) {}
+    </script>
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#0f0f0f" />
+    <meta name="theme-color" content="#0B1020" />
 
     <!-- SEO -->
     <title>{title}</title>
@@ -75,9 +94,11 @@ const ogImageURL = new URL(ogImage.replace(/^\//, ''), Astro.site);
     <!-- RSS Feed -->
     <link rel="alternate" type="application/rss+xml" title="Lucas Jimenez Boulot · Blog" href={new URL('rss.xml', Astro.site)} />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href={`${import.meta.env.BASE_URL}/profile.jpeg`} />
-    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}/profile.jpeg`} />
+    <!-- Icônes — générées depuis brand/ (voir brand/GUIDE.md) -->
+    <link rel="icon" href={`${base}/favicon.ico`} sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
+    <link rel="manifest" href={`${base}/site.webmanifest`} />
 
     <!-- Author -->
     <meta name="author" content="Lucas Jimenez Boulot" />
@@ -90,17 +111,10 @@ const ogImageURL = new URL(ogImage.replace(/^\//, ''), Astro.site);
       sans bloquer le rendu (print = basse priorité), puis onload la bascule en "all".
       Sans ça, la police bloque le premier rendu jusqu'à 8s sur mobile lent.
     -->
-    <link rel="preload" as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
+    <link rel="preload" as="style" href={fontsURL} />
+    <link rel="stylesheet" href={fontsURL} media="print" onload="this.media='all'" />
     <noscript>
-      <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" />
+      <link rel="stylesheet" href={fontsURL} />
     </noscript>
 
     <!-- JSON-LD — Person -->
@@ -133,15 +147,19 @@ const ogImageURL = new URL(ogImage.replace(/^\//, ''), Astro.site);
     })} />
   </head>
   <body>
-    <Nav />
-    <main id="main-content" tabindex="-1">
-      <slot />
-    </main>
-    <Footer />
-
-    <script>
-      import { initAnimations } from '../scripts/animations';
-      document.addEventListener('DOMContentLoaded', initAnimations);
-    </script>
+    {boot && (
+      <div class="boot" aria-hidden="true">
+        <Mark drawable />
+      </div>
+    )}
+    <!-- Hors de .cq : un conteneur de requêtes capture les éléments fixed, le loader doit couvrir l'écran -->
+    <div class="cq">
+      <a class="skip-link" href="#main-content">Aller au contenu</a>
+      <Nav />
+      <main id="main-content" tabindex="-1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
   </body>
 </html>

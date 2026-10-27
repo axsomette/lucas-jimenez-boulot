@@ -1,182 +1,80 @@
 ---
 /**
- * LatestPosts.astro — Section home : 3 derniers articles
- * Design aligné sur Projects.astro (grille de cards)
+ * LatestPosts — les trois derniers articles, en liste datée.
  */
 import { getCollection } from 'astro:content';
+import { formatDate, readingTime } from '@/utils/format';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-
 const latestPosts = allPosts
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3)
-  .map(post => {
-    const wordCount   = post.body.split(/\s+/).length;
-    const readingTime = Math.max(1, Math.ceil(wordCount / 200));
-    return { ...post, readingTime };
-  });
+  .slice(0, 3);
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 {latestPosts.length > 0 && (
-  <section class="section" aria-label="Derniers articles">
+  <section id="blog" class="section" aria-labelledby="blog-title">
     <div class="container">
-
-      <header class="latest-posts__header reveal">
-        <span class="section-label">Blog</span>
-        <h2 class="section-title">Derniers articles</h2>
-        <p class="section-subtitle">
-          Retours d'expérience sur Drupal, PHP, JavaScript et le développement web.
-        </p>
+      <header class="section-head reveal">
+        <p class="kicker">Blog</p>
+        <h2 class="title" id="blog-title">Derniers articles</h2>
+        <p class="lead">Retours d'expérience sur Drupal, PHP, JavaScript et le développement web.</p>
       </header>
 
-      <ul class="latest-posts__grid reveal" aria-label="Articles récents">
-        {latestPosts.map(post => {
-          const formattedDate = new Intl.DateTimeFormat('fr-FR', {
-            year:  'numeric',
-            month: 'long',
-            day:   'numeric',
-          }).format(new Date(post.data.date));
-
-          return (
-            <li>
-              <a
-                href={`${base}/blog/${post.slug}/`}
-                class="post-card card"
-                aria-label={`Lire l'article : ${post.data.title}`}
-              >
-                <article>
-                  <header class="post-card__header">
-                    <div class="post-card__meta">
-                      <time
-                        class="post-card__date"
-                        datetime={new Date(post.data.date).toISOString()}
-                      >
-                        {formattedDate}
-                      </time>
-                      <span class="post-card__sep" aria-hidden="true">·</span>
-                      <span class="post-card__reading-time">
-                        {post.readingTime} min
-                      </span>
-                    </div>
-                    <h3 class="post-card__title">{post.data.title}</h3>
-                  </header>
-
-                  <p class="post-card__excerpt">{post.data.excerpt}</p>
-
-                  {post.data.tags.length > 0 && (
-                    <footer class="post-card__tags" aria-label="Tags">
-                      {post.data.tags.slice(0, 3).map(tag => (
-                        <span class="tag">{tag}</span>
-                      ))}
-                    </footer>
-                  )}
-                </article>
-              </a>
-            </li>
-          );
-        })}
+      <ul class="posts">
+        {latestPosts.map(post => (
+          <li class="post">
+            <a href={`${base}/blog/${post.slug}/`}>
+              <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, 'short')}</time>
+              <span class="post__title">{post.data.title}</span>
+              <span class="post__time">{readingTime(post.body)} min</span>
+              <svg class="post__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          </li>
+        ))}
       </ul>
 
-      <div class="latest-posts__cta reveal">
-        <a href={`${base}/blog/`} class="btn btn--outline">
-          Voir tous les articles
-          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
+      <p class="posts__more">
+        <a class="link" href={`${base}/blog/`}>
+          Les {allPosts.length} articles
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
         </a>
-      </div>
-
+      </p>
     </div>
   </section>
 )}
 
 <style>
-  .latest-posts__header {
-    max-width: 860px;
-  }
+  @layer components {
+    .posts { border-top: 1px solid var(--color-line); }
+    .post a {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "date time" "title title";
+      gap: 8px 16px;
+      padding: 22px 4px;
+      border-bottom: 1px solid var(--color-line);
+      transition: background-color .2s var(--ease-out);
+    }
+    .post time { grid-area: date; font: 500 12.5px/1.4 var(--font-mono); color: var(--color-mist); }
+    .post__title { grid-area: title; font: 700 clamp(19px, 2.2cqi, 25px)/1.2 var(--font-display); font-stretch: 106%; letter-spacing: -.015em; text-wrap: balance; }
+    .post__time { grid-area: time; font: 500 12.5px/1.4 var(--font-mono); color: var(--color-mist); white-space: nowrap; }
+    .post__arrow { display: none; }
+    .posts__more { margin-top: 20px; }
 
-  /* ── Grille de 3 cards ── */
-  .latest-posts__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-    gap: var(--space-6);
-    margin-bottom: var(--space-10);
-  }
+    @media (hover: hover) {
+      .post a:hover { background: var(--color-ink-1); }
+      .post a:hover .post__title { text-decoration: underline 2px var(--color-signal); text-underline-offset: 5px; }
+    }
 
-  /* ── Card ── */
-  .post-card {
-    display: block;
-    padding: var(--space-6);
-    text-decoration: none;
-    color: inherit;
-    transition: border-color var(--transition-base), transform var(--transition-slow);
-  }
-
-  .post-card:hover {
-    border-color: var(--color-border-accent);
-    transform: translateY(-2px);
-  }
-
-  .post-card article {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    height: 100%;
-  }
-
-  .post-card__header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-
-  .post-card__meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .post-card__date,
-  .post-card__reading-time,
-  .post-card__sep {
-    font-size: var(--text-xs);
-    font-family: var(--font-mono);
-    color: var(--color-text-3);
-  }
-
-  .post-card__title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-tight);
-    transition: color var(--transition-fast);
-  }
-
-  .post-card:hover .post-card__title {
-    color: var(--color-accent-text);
-  }
-
-  .post-card__excerpt {
-    font-size: var(--text-sm);
-    color: var(--color-text-2);
-    line-height: var(--leading-relaxed);
-    flex: 1;
-  }
-
-  .post-card__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: auto;
-  }
-
-  /* ── CTA "Voir tout" ── */
-  .latest-posts__cta {
-    display: flex;
-    justify-content: flex-start;
+    @container site (min-width: 600px) {
+      .post a { grid-template-columns: 130px minmax(0, 1fr) auto; grid-template-areas: "date title time"; align-items: baseline; padding: 24px 8px; }
+    }
+    @container site (min-width: 960px) {
+      .post a { grid-template-columns: 130px minmax(0, 1fr) auto 16px; grid-template-areas: "date title time arrow"; }
+      .post__arrow { display: block; grid-area: arrow; width: 16px; height: 16px; color: var(--color-mist); transition: transform .2s var(--ease-out), color .2s; }
+      .post a:hover .post__arrow { transform: translateX(4px); color: var(--color-signal); }
+    }
   }
 </style>

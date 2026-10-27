@@ -1,83 +1,53 @@
 ---
-const year = new Date().getFullYear();
+import Mark from './ui/Mark.astro';
 
-const links = [
-  { label: 'LinkedIn', href: 'https://fr.linkedin.com/in/%F0%9F%92%BB-lucas-jimenez-boulot-35629919b' },
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+const year: number = new Date().getFullYear();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const links: FooterLink[] = [
+  { label: 'LinkedIn', href: 'https://fr.linkedin.com/in/%F0%9F%92%BB-lucas-jimenez-boulot-35629919b', external: true },
+  { label: 'Blog', href: `${base}/blog/` },
+  { label: 'Flux RSS', href: `${base}/rss.xml` },
 ];
 ---
 
-<footer class="footer" role="contentinfo">
-  <div class="container footer__inner">
-
-    <p class="footer__copy">
-      © {year} Lucas Jimenez Boulot
-    </p>
-
-    <nav aria-label="Liens réseaux sociaux">
-      <ul class="footer__links">
+<footer class="foot">
+  <div class="container foot__in">
+    <p class="foot__brand"><Mark />© {year} Lucas Jimenez Boulot</p>
+    <nav aria-label="Liens de pied de page">
+      <ul>
         {links.map(link => (
           <li>
             <a
               href={link.href}
-              class="footer__link"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${link.label} (ouvre dans un nouvel onglet)`}
+              target={link.external ? '_blank' : undefined}
+              rel={link.external ? 'noopener noreferrer' : undefined}
             >
               {link.label}
+              {link.external && <span class="sr-only"> (nouvel onglet)</span>}
             </a>
           </li>
         ))}
       </ul>
     </nav>
-
+    <p class="foot__made">Site statique construit avec Astro, hébergé sur GitHub Pages.</p>
   </div>
 </footer>
 
 <style>
-  .footer {
-    border-top: 1px solid var(--color-border);
-    padding-block: var(--space-6);
-  }
-
-  .footer__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-6);
-    flex-wrap: wrap;
-  }
-
-  .footer__copy {
-    font-size: var(--text-sm);
-    color: var(--color-text-3);
-    line-height: 1;
-  }
-
-  .footer__links {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-  }
-
-  .footer__link {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-2);
-    padding: var(--space-2) var(--space-3);
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    border-radius: var(--radius-md);
-    transition: color var(--transition-fast), background-color var(--transition-fast);
-  }
-
-  .footer__link:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface);
-  }
-
-  @media (max-width: 560px) {
-    .footer__inner { justify-content: center; text-align: center; }
+  @layer components {
+    .foot { padding-block: 36px 44px; border-top: 1px solid var(--color-line); }
+    .foot__in { display: flex; flex-wrap: wrap; align-items: center; gap: 18px 32px; }
+    .foot__brand { display: flex; align-items: center; gap: 12px; margin-right: auto; font-size: 14.5px; color: var(--color-fog); }
+    .foot__brand :global(.mark) { width: 24px; height: 24px; color: var(--color-bone); }
+    .foot ul { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+    .foot ul a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14.5px; color: var(--color-fog); }
+    .foot ul a:hover { color: var(--color-bone); }
+    .foot__made { width: 100%; font: 500 12px/1.5 var(--font-mono); color: var(--color-mist); }
   }
 </style>

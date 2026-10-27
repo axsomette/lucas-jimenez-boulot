@@ -1,0 +1,29 @@
+---
+/**
+ * Mark — le symbole L▮J.
+ * Le L et le J sont des traits en currentColor, le curseur est en Signal.
+ * `drawable` ajoute pathLength="1" pour animer le tracé (loader).
+ * Sans `label`, le symbole est décoratif et masqué aux lecteurs d'écran.
+ */
+interface Props {
+  class?: string;
+  drawable?: boolean;
+  label?: string;
+}
+
+const { class: className, drawable = false, label } = Astro.props;
+const pathLength: string | undefined = drawable ? '1' : undefined;
+---
+
+<svg
+  class:list={['mark', className]}
+  viewBox="0 0 256 256"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  <path class="mark__l" pathLength={pathLength} d="M100 196H54V42" />
+  <path class="mark__j" pathLength={pathLength} d="M156 196H160A42 42 0 0 0 202 154V42" />
+  <rect class="mark__c" x="114" y="94" width="28" height="60" />
+</svg>

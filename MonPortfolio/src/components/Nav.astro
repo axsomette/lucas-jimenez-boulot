@@ -1,326 +1,239 @@
 ---
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+/**
+ * Nav — barre collante avec le logo.
+ * Au-dessus de 1060 px de large : liens en ligne. En dessous : menu <details>,
+ * qui reste utilisable sans JS ; le script ne fait que le refermer proprement.
+ */
+import { getCollection } from 'astro:content';
+import Mark from './ui/Mark.astro';
 
-const navLinks = [
-  { href: `${base}/#projets`,    label: 'Projets'    },
-  { href: `${base}/#experience`, label: 'Expérience' },
-  { href: `${base}/#apropos`,    label: 'À propos'   },
-  { href: `${base}/#ia`,         label: 'IA'         },
-  { href: `${base}/blog/`,       label: 'Blog', external: true },
+interface NavLink {
+  href: string;
+  label: string;
+  /** Repère discret affiché dans le menu mobile */
+  hint?: string;
+  /** Lien vers une autre page (pas une ancre de l'accueil) */
+  page?: boolean;
+}
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const projects = await getCollection('projects');
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const experiences = await getCollection('experiences');
+const since: number = Math.min(...experiences.map(xp => xp.data.startDate.getFullYear()));
+const onBlog: boolean = Astro.url.pathname.includes('/blog');
+
+const navLinks: NavLink[] = [
+  { href: `${base}/#projets`,  label: 'Projets',  hint: `${projects.length} fiches` },
+  { href: `${base}/#parcours`, label: 'Parcours', hint: `depuis ${since}` },
+  { href: `${base}/#apropos`,  label: 'À propos' },
+  { href: `${base}/#ia`,       label: 'IA',       hint: 'outillage' },
+  { href: `${base}/blog/`,     label: 'Blog',     hint: `${posts.length} articles`, page: true },
 ];
 ---
 
-<header class="nav" role="banner">
-  <div class="container nav__inner">
-
-    <a href={import.meta.env.BASE_URL} class="nav__logo" aria-label="Lucas Jimenez Boulot, accueil">
-      <img
-        src={`${import.meta.env.BASE_URL}/profile.jpeg`}
-        alt=""
-        class="nav__logo-avatar"
-        width="28"
-        height="28"
-        loading="eager"
-        aria-hidden="true"
-      />
-      Lucas Jimenez <span class="nav__logo-accent">Boulot</span>
+<header class="nav">
+  <div class="container nav__in">
+    <a href={`${base}/`} class="brand" aria-label="Lucas Jimenez Boulot, accueil">
+      <Mark />
+      <span class="brand__name">Lucas Jimenez Boulot</span>
     </a>
 
-    <nav aria-label="Navigation principale">
-      <ul class="nav__links">
+    <nav class="nav__links" aria-label="Navigation principale">
+      <ul>
         {navLinks.map(link => (
           <li>
             <a
               href={link.href}
-              class="nav__link"
-              data-external={link.external ? 'true' : undefined}
-            >
-              {link.label}
-            </a>
+              data-page={link.page ? 'true' : undefined}
+              aria-current={link.page && onBlog ? 'page' : undefined}
+            >{link.label}</a>
           </li>
         ))}
       </ul>
     </nav>
 
-    <a href={`${base}/#contact`} class="btn btn--outline nav__cta">
-      Me contacter
-    </a>
+    <a href={`${base}/#contact`} class="btn btn--line nav__cta">Me contacter</a>
 
-    <button
-      class="nav__burger"
-      aria-label="Ouvrir le menu"
-      aria-expanded="false"
-      aria-controls="mobile-menu"
-    >
-      <span class="nav__burger-line"></span>
-      <span class="nav__burger-line"></span>
-      <span class="nav__burger-line"></span>
-    </button>
-
-  </div>
-
-  <div class="nav__mobile" id="mobile-menu" role="dialog" aria-label="Menu mobile" hidden>
-    <nav>
-      <ul class="nav__mobile-links">
-        {navLinks.map(link => (
-          <li>
-            <a href={link.href} class="nav__mobile-link">{link.label}</a>
-          </li>
-        ))}
-        <li>
-          <a href={`${base}/#contact`} class="btn btn--primary nav__mobile-cta">
-            Me contacter
-          </a>
-        </li>
-      </ul>
-    </nav>
+    <details class="menu">
+      <summary>
+        <span class="menu__icon" aria-hidden="true"></span>
+        <span class="menu__open">Menu</span>
+        <span class="menu__close">Fermer</span>
+      </summary>
+      <nav class="menu__sheet" aria-label="Navigation mobile">
+        <ul>
+          {navLinks.map(link => (
+            <li>
+              <a href={link.href} aria-current={link.page && onBlog ? 'page' : undefined}>
+                {link.label}
+                {link.hint && <span>{link.hint}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a href={`${base}/#contact`} class="btn btn--signal">Me contacter</a>
+      </nav>
+    </details>
   </div>
 </header>
 
-<style>
-  .nav {
-    position: fixed;
-    inset-block-start: 0;
-    inset-inline: 0;
-    z-index: var(--z-nav);
-    height: var(--nav-height);
-    background-color: rgba(15, 15, 15, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--color-border);
-    transition: border-color var(--transition-base);
-    overflow: visible;
-  }
-
-  .nav::after {
-    content: '';
-    position: absolute;
-    inset-block-end: -1px;
-    inset-inline: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      var(--color-border) 0%,
-      var(--color-border) 55%,
-      #6366f1 78%,
-      #818cf8 90%,
-      #c7d2fe 100%
-    );
-    pointer-events: none;
-  }
-
-  .nav.scrolled {
-    border-bottom-color: var(--color-border-hover);
-  }
-
-  .nav__inner {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-8);
-  }
-
-  /* Logo */
-  .nav__logo {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    letter-spacing: var(--tracking-tight);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .nav__logo-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-full);
-    object-fit: cover;
-    object-position: center top;
-    border: 1.5px solid var(--color-border-accent);
-    flex-shrink: 0;
-    transition: border-color var(--transition-fast);
-  }
-
-  .nav__logo:hover .nav__logo-avatar {
-    border-color: var(--color-accent);
-  }
-
-  @media (max-width: 720px) {
-    .nav__logo-avatar { display: none; }
-  }
-
-  .nav__logo-accent {
-    color: var(--color-accent);
-  }
-
-  /* Liens */
-  .nav__links {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-  }
-
-  .nav__link {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    transition: color var(--transition-fast), background-color var(--transition-fast);
-  }
-
-  .nav__link:hover,
-  .nav__link.active {
-    color: var(--color-text);
-    background-color: var(--color-surface);
-  }
-
-  /* CTA */
-  .nav__cta {
-    flex-shrink: 0;
-    font-size: var(--text-sm);
-    padding-block: 0.5rem;
-  }
-
-  /* Burger */
-  .nav__burger {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    background: none;
-    border: 1px solid var(--color-border);
-    cursor: pointer;
-    padding: var(--space-2);
-    border-radius: var(--radius-md);
-    min-height: 44px;
-    min-width: 44px;
-    transition: border-color var(--transition-fast);
-  }
-
-  .nav__burger:hover { border-color: var(--color-border-hover); }
-
-  .nav__burger-line {
-    display: block;
-    width: 18px;
-    height: 1.5px;
-    background-color: var(--color-text);
-    border-radius: var(--radius-full);
-    transition: transform var(--transition-base), opacity var(--transition-fast);
-    margin-inline: auto;
-  }
-
-  /* Mobile menu */
-  .nav__mobile {
-    position: absolute;
-    inset-block-start: var(--nav-height);
-    inset-inline: 0;
-    background-color: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
-    padding: var(--space-4) var(--container-padding) var(--space-6);
-  }
-
-  .nav__mobile[hidden] { display: none; }
-
-  .nav__mobile-links {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  .nav__mobile-link {
-    display: block;
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-2);
-    padding: var(--space-3) var(--space-2);
-    border-radius: var(--radius-md);
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    transition: color var(--transition-fast), background-color var(--transition-fast);
-  }
-
-  .nav__mobile-link:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface);
-  }
-
-  .nav__mobile-cta {
-    width: 100%;
-    justify-content: center;
-    margin-block-start: var(--space-3);
-  }
-
-  /* Responsive */
-  @media (max-width: 720px) {
-    .nav__links,
-    .nav__cta { display: none; }
-    .nav__burger { display: flex; }
-  }
-
-  /* Burger ouvert */
-  .nav__burger[aria-expanded="true"] .nav__burger-line:nth-child(1) {
-    transform: translateY(6.5px) rotate(45deg);
-  }
-  .nav__burger[aria-expanded="true"] .nav__burger-line:nth-child(2) {
-    opacity: 0;
-  }
-  .nav__burger[aria-expanded="true"] .nav__burger-line:nth-child(3) {
-    transform: translateY(-6.5px) rotate(-45deg);
-  }
-</style>
-
 <script>
-  const nav = document.querySelector('.nav') as HTMLElement;
+  const menu = document.querySelector<HTMLDetailsElement>('.menu');
+  const summary = menu?.querySelector<HTMLElement>('summary');
 
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 20);
-  }, { passive: true });
-
-  const burger = document.querySelector('.nav__burger') as HTMLButtonElement;
-  const mobileMenu = document.getElementById('mobile-menu') as HTMLElement;
-
-  burger?.addEventListener('click', () => {
-    const isOpen = burger.getAttribute('aria-expanded') === 'true';
-    burger.setAttribute('aria-expanded', String(!isOpen));
-    mobileMenu.hidden = isOpen;
+  // Une ancre de la même page ne recharge rien : on referme le menu à la main.
+  menu?.querySelectorAll<HTMLAnchorElement>('.menu__sheet a').forEach(link => {
+    link.addEventListener('click', () => { menu.open = false; });
   });
 
-  mobileMenu?.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      burger.setAttribute('aria-expanded', 'false');
-      mobileMenu.hidden = true;
-    });
+  document.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && menu?.open) {
+      menu.open = false;
+      summary?.focus();
+    }
   });
 
-  // Lien actif — uniquement les liens d'ancres (#), pas les liens de pages
-  const sections   = document.querySelectorAll<HTMLElement>('[data-section]');
-  const navLinksEl = document.querySelectorAll<HTMLAnchorElement>('.nav__link:not([data-external])');
+  document.addEventListener('click', (event: MouseEvent) => {
+    if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) menu.open = false;
+  });
 
-  // Marquer le lien Blog actif si on est sur /blog
-  const blogLink = document.querySelector<HTMLAnchorElement>('.nav__link[data-external]');
-  if (blogLink && window.location.pathname.includes('/blog')) {
-    blogLink.classList.add('active');
-  }
-
-  const sectionObs = new IntersectionObserver(entries => {
+  // Lien actif : la section qui occupe le haut de l'écran
+  const anchors = [...document.querySelectorAll<HTMLAnchorElement>('.nav__links a:not([data-page])')];
+  const sections = document.querySelectorAll<HTMLElement>('main section[id]');
+  const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navLinksEl.forEach(link => {
-          // Compare uniquement le hash (#projets, #experience…) peu importe le préfixe base
-          const linkHash = link.getAttribute('href')?.split('#')[1];
-          link.classList.toggle('active', linkHash === entry.target.id);
-        });
-      }
+      if (!entry.isIntersecting) return;
+      anchors.forEach(a => {
+        const isCurrent = a.hash === `#${entry.target.id}`;
+        if (isCurrent) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
     });
   }, { rootMargin: '-30% 0px -60% 0px' });
-
-  sections.forEach(s => sectionObs.observe(s));
+  sections.forEach(section => observer.observe(section));
 </script>
+
+<style>
+  @layer components {
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-nav);
+      background: color-mix(in srgb, var(--color-ink-0) 88%, transparent);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .nav__in { display: flex; align-items: center; gap: 16px; min-height: var(--nav-height); }
+
+    .brand {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 44px;
+      min-width: 0;
+      margin-right: auto;
+    }
+    .brand :global(.mark) { width: 30px; height: 30px; color: var(--color-bone); }
+    .brand:hover :global(.mark__c) { animation: blink .5s steps(1, end) 3; }
+    .brand__name { font: 700 16px/1.1 var(--font-display); font-stretch: 108%; letter-spacing: -.01em; white-space: nowrap; }
+
+    .nav__links { display: none; }
+    .nav__links ul { display: flex; gap: 4px; }
+    .nav__links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 12px;
+      border-radius: var(--radius-corner-sm);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--color-fog);
+      transition: color .15s, background-color .15s;
+    }
+    .nav__links a:hover { color: var(--color-bone); background: var(--color-ink-1); }
+    .nav__links a[aria-current] { color: var(--color-bone); }
+    .nav__links a[aria-current]::after { content: ""; width: 5px; height: 11px; margin-left: 7px; background: var(--color-signal); }
+
+    .nav__cta { display: none; min-height: 44px; padding: 0 18px; }
+
+    .menu > summary {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--color-line-strong);
+      border-radius: var(--radius-corner-sm);
+      font: 600 14px/1 var(--font-body);
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    .menu > summary::-webkit-details-marker { display: none; }
+    .menu__icon { position: relative; width: 16px; height: 10px; }
+    .menu__icon::before,
+    .menu__icon::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: currentColor;
+      transition: transform .25s var(--ease-out), top .25s var(--ease-out);
+    }
+    .menu__icon::before { top: 0; }
+    .menu__icon::after { top: 8px; }
+    .menu[open] .menu__icon::before { top: 4px; transform: rotate(45deg); }
+    .menu[open] .menu__icon::after { top: 4px; transform: rotate(-45deg); }
+    .menu__close { display: none; }
+    .menu[open] .menu__open { display: none; }
+    .menu[open] .menu__close { display: inline; }
+
+    .menu__sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      z-index: 1;
+      padding: 8px var(--container-padding) 28px;
+      background: var(--color-ink-0);
+      border-bottom: 1px solid var(--color-line);
+      box-shadow: 0 0 0 100vmax rgb(5 8 18 / .72);
+      animation: sheet-in .28s var(--ease-out);
+    }
+    .menu__sheet ul { display: grid; }
+    .menu__sheet li + li { border-top: 1px solid var(--color-line); }
+    .menu__sheet a:not(.btn) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 60px;
+      font: 700 clamp(22px, 6cqi, 28px)/1 var(--font-display);
+      font-stretch: 110%;
+    }
+    .menu__sheet a:not(.btn) span { font: 500 12px/1 var(--font-mono); letter-spacing: .1em; color: var(--color-mist); }
+    .menu__sheet .btn { width: 100%; min-height: 52px; margin-top: 20px; }
+
+    @container site (max-width: 379px) {
+      .brand__name { display: none; }
+    }
+    @container site (min-width: 600px) {
+      .nav__cta { display: inline-flex; }
+      .menu__sheet .btn { display: none; }
+    }
+    @container site (min-width: 1060px) {
+      .nav__in { gap: 24px; }
+      .nav__links { display: block; }
+      .menu { display: none; }
+    }
+  }
+
+  @keyframes sheet-in { from { opacity: 0; transform: translateY(-8px); } }
+</style>

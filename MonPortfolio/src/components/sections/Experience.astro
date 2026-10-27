@@ -1,250 +1,91 @@
 ---
 /**
- * Experience — Encart parcours pro + compteur années dynamique
+ * Experience — parcours, du poste actuel au premier.
+ * L'année de départ et les durées sont calculées depuis la collection.
  */
 import { getCollection } from 'astro:content';
+import { durationLabel, formatPeriod } from '@/utils/format';
 
 const allExperiences = await getCollection('experiences');
 const experiences = allExperiences.sort((a, b) => a.data.order - b.data.order);
 
-/** Années d'expérience depuis le poste le plus ancien de la collection */
-const earliest = experiences.reduce((min, xp) =>
-  xp.data.startDate < min ? xp.data.startDate : min,
-  experiences[0].data.startDate
-);
-const yearsExp = Math.floor(
-  (Date.now() - earliest.getTime()) / (1000 * 60 * 60 * 24 * 365.25)
-);
-
-function formatPeriod(start: Date, end?: Date, current?: boolean): string {
-  const opts: Intl.DateTimeFormatOptions = { month: 'short', year: 'numeric' };
-  const from = start.toLocaleDateString('fr-FR', opts);
-  const to = current ? "aujourd'hui" : end ? end.toLocaleDateString('fr-FR', opts) : '';
-  // Demi-cadratin (–) et non cadratin (—) : c'est le caractère des plages.
-  return `${from} – ${to}`;
-}
-
-function durationMonths(start: Date, end?: Date): string {
-  const to = end ?? new Date();
-  const months =
-    (to.getFullYear() - start.getFullYear()) * 12 +
-    (to.getMonth() - start.getMonth());
-  const y = Math.floor(months / 12);
-  const m = months % 12;
-  const parts: string[] = [];
-  if (y > 0) parts.push(`${y} an${y > 1 ? 's' : ''}`);
-  if (m > 0) parts.push(`${m} mois`);
-  return parts.join(' ');
-}
+const firstYear: number = Math.min(...experiences.map(xp => xp.data.startDate.getFullYear()));
+const allCdi: boolean = experiences.every(xp => xp.data.type === 'CDI');
+const allOccitanie: boolean = experiences.every(xp => xp.data.location.includes('Occitanie'));
+const summary: string = `${experiences.length} poste${experiences.length > 1 ? 's' : ''}${allCdi ? ' en CDI' : ''} depuis${allOccitanie ? ', tous en Occitanie' : ''}.`;
 ---
 
-<section id="experience" class="section section--alt" data-section aria-label="Expérience professionnelle">
+<section id="parcours" class="section" aria-labelledby="parcours-title">
   <div class="container">
-
-    <header class="xp__header reveal">
-      <span class="section-label">Parcours</span>
-      <h2 class="section-title">Expérience</h2>
-      <p class="section-subtitle">
-        Depuis 2022, j'interviens sur des applications métier et des sites vitrine,
-        le plus souvent sur une stack que je n'ai pas choisie. Reprendre le code d'un
-        autre, en comprendre les contraintes et livrer sans rien casser occupe
-        l'essentiel de mon travail.
+    <header class="section-head reveal">
+      <p class="kicker">Parcours</p>
+      <h2 class="title" id="parcours-title">Expérience</h2>
+      <p class="lead">
+        J'interviens sur des applications métier et des sites vitrine, le plus souvent sur une stack que je n'ai pas choisie.
+        Reprendre le code d'un autre, en comprendre les contraintes et livrer sans rien casser occupe l'essentiel de mon travail.
       </p>
     </header>
 
-    <div class="xp__layout">
+    <div class="xp">
+      <p class="xp__since"><b>{firstYear}</b><span>Premier poste en développement web. {summary}</span></p>
 
-      <!-- Compteur années -->
-      <div class="xp__counter reveal" aria-label={`${yearsExp} ans d'expérience`}>
-        <span class="xp__counter-num">{yearsExp}<span class="xp__counter-plus">+</span></span>
-        <span class="xp__counter-label">ans d'expérience<br/>en développement web</span>
-      </div>
-
-      <!-- Liste des postes -->
-      <ol class="xp__list" aria-label="Expériences professionnelles">
-        {experiences.map((xp) => (
-          <li class:list={['xp__item reveal', { 'xp__item--current': xp.data.current }]}>
-            <div class="xp__item-left">
-              <h3 class="xp__role">{xp.data.role}</h3>
-              <p class="xp__location">
-                <svg aria-hidden="true" width="9" height="9" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 1.5A4.5 4.5 0 0 0 3.5 6c0 3 4.5 8.5 4.5 8.5S12.5 9 12.5 6A4.5 4.5 0 0 0 8 1.5Zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" fill="currentColor"/>
-                </svg>
-                {xp.data.location}
-              </p>
-            </div>
-            <div class="xp__item-right">
-              <span class:list={['xp__badge', `xp__badge--${xp.data.type.toLowerCase()}`]}>
-                {xp.data.type}
-              </span>
-              {xp.data.current && (
-                <span class="xp__dot-live" aria-label="Poste actuel" />
-              )}
-            </div>
+      <ol class="jobs" aria-label="Postes, du plus récent au plus ancien">
+        {experiences.map(xp => (
+          <li class="job">
+            <span class="job__when">
+              {formatPeriod(xp.data.startDate, xp.data.endDate, xp.data.current)}
+              {xp.data.current && <span class="caret" aria-hidden="true"></span>}
+            </span>
+            <h3 class="job__what">{xp.data.role}</h3>
+            <span class="job__type">{xp.data.type}</span>
+            <span class="job__where">{xp.data.company} · {xp.data.location.split(',')[0]}</span>
+            <span class="job__len">{durationLabel(xp.data.startDate, xp.data.endDate)}</span>
           </li>
         ))}
       </ol>
-
     </div>
   </div>
 </section>
 
 <style>
-  .xp__header { max-width: 860px; }
+  @layer components {
+    .xp { display: grid; gap: 40px; }
 
-  /* ── Layout deux colonnes ── */
-  .xp__layout {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: var(--space-16);
-    align-items: start;
-    margin-block-start: var(--space-12);
-  }
+    .xp__since { display: grid; gap: 8px; align-content: start; }
+    .xp__since b { font: 850 clamp(64px, 12cqi, 132px)/.85 var(--font-display); font-stretch: 118%; letter-spacing: -.04em; }
+    .xp__since span { max-width: 26ch; color: var(--color-fog); }
 
-  /* ── Compteur ── */
-  .xp__counter {
-    position: sticky;
-    top: calc(var(--nav-height) + var(--space-8));
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-8) var(--space-6);
-    background: var(--color-bg);
-    border: 1px solid var(--color-border-accent);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    box-shadow: 0 0 24px rgba(99, 102, 241, 0.08);
-  }
-
-  .xp__counter-num {
-    font-size: clamp(3rem, 6vw, 4.5rem);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-accent);
-    line-height: 1;
-    letter-spacing: var(--tracking-tight);
-  }
-
-  .xp__counter-plus {
-    font-size: 0.6em;
-    vertical-align: super;
-    color: var(--color-accent);
-  }
-
-  .xp__counter-label {
-    font-size: var(--text-sm);
-    color: var(--color-text-2);
-    line-height: var(--leading-snug);
-  }
-
-  /* ── Liste ── */
-  .xp__list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .xp__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
-    padding-block: var(--space-5);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .xp__item:first-child { border-top: 1px solid var(--color-border); }
-  .xp__item--current .xp__role { color: var(--color-accent); }
-
-  .xp__item-left {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-  }
-
-  .xp__location {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: var(--text-xs);
-    color: var(--color-text-3);
-  }
-
-  .xp__item-right {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    flex-shrink: 0;
-  }
-
-  .xp__role {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
-    letter-spacing: var(--tracking-tight);
-  }
-
-  /* ── Badge ── */
-  .xp__badge {
-    font-size: var(--text-xs);
-    font-family: var(--font-mono);
-    padding: 0.15rem 0.5rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid;
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-  }
-
-  .xp__badge--cdi {
-    color: var(--color-accent);
-    border-color: rgba(99, 102, 241, 0.3);
-    background: rgba(99, 102, 241, 0.07);
-  }
-
-  /* Dot animé "live" */
-  .xp__dot-live {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: var(--radius-full);
-    background: #34d399;
-    animation: dot-live 1.8s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes dot-live {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.3; transform: scale(0.6); }
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 860px) {
-    .xp__layout {
-      grid-template-columns: 1fr;
-      gap: var(--space-8);
+    .jobs { border-top: 1px solid var(--color-line); }
+    .job {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "when type" "what what" "where len";
+      gap: 6px 24px;
+      align-items: baseline;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--color-line);
     }
-    .xp__counter {
-      position: static;
-      flex-direction: row;
-      justify-content: center;
-      gap: var(--space-6);
-      padding: var(--space-6);
+    .job__when { grid-area: when; font: 500 13px/1.4 var(--font-mono); color: var(--color-fog); }
+    .job__when .caret { height: 1em; vertical-align: -.15em; }
+    .job__what { grid-area: what; font: 700 clamp(20px, 2.4cqi, 26px)/1.2 var(--font-display); font-stretch: 108%; letter-spacing: -.015em; }
+    .job__where { grid-area: where; font-size: 15.5px; color: var(--color-fog); }
+    .job__len { grid-area: len; font: 500 13px/1.4 var(--font-mono); color: var(--color-mist); white-space: nowrap; }
+    .job__type {
+      grid-area: type;
+      padding: 5px 7px;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-corner-sm);
+      font: 500 11.5px/1 var(--font-mono);
+      letter-spacing: .08em;
+      color: var(--color-mist);
     }
-    .xp__counter-label { text-align: left; }
-  }
 
-  @media (max-width: 480px) {
-    .xp__item {
-      flex-wrap: wrap;
-      gap: var(--space-2);
+    @container site (min-width: 600px) {
+      .job { grid-template-columns: 210px minmax(0, 1fr) auto; grid-template-areas: "when what type" "len where where"; }
     }
-    .xp__item-right {
-      order: -1;
-      width: 100%;
-    }
-    .xp__role {
-      font-size: var(--text-sm);
+    @container site (min-width: 960px) {
+      .xp { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 64px; }
+      .xp__since { position: sticky; top: calc(var(--nav-height) + 40px); }
     }
   }
 </style>

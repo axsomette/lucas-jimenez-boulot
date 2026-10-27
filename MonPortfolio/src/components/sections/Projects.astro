@@ -1,10 +1,10 @@
 ---
 /**
- * Projects — Section galerie des projets
- * Suit la convention /new-component (interface Props, HTML sémantique, CSS scoped)
+ * Projects — registre des projets, filtrable Tous / Pro / Perso.
+ * Le filtre est en CSS pur (boutons radio + :has()) : il marche sans JS et reste accessible au clavier.
  */
 import { getCollection } from 'astro:content';
-import ProjectCard from '../ui/ProjectCard.astro';
+import ProjectRow from '@/components/ui/ProjectRow.astro';
 
 const allProjects = await getCollection('projects');
 const sortedProjects = allProjects.sort((a, b) => {
@@ -13,170 +13,107 @@ const sortedProjects = allProjects.sort((a, b) => {
   if (!a.data.featured && b.data.featured) return 1;
   return b.data.date.getTime() - a.data.date.getTime();
 });
+
+const proCount: number = sortedProjects.filter(p => p.data.type === 'pro').length;
+const persoCount: number = sortedProjects.length - proCount;
 ---
 
-<section id="projets" class="section section--alt" data-section aria-label="Mes projets">
-  <div class="container projects__container">
-    <header class="projects__header reveal">
-      <span class="section-label">Réalisations</span>
-      <h2 class="section-title">Mes projets</h2>
-      <p class="section-subtitle">
+<section id="projets" class="section" aria-labelledby="projets-title">
+  <div class="container">
+    <header class="section-head reveal">
+      <p class="kicker">Réalisations</p>
+      <h2 class="title" id="projets-title">Projets</h2>
+      <p class="lead">
         Des sites institutionnels sous Drupal et des applications métier sur mesure.
         Chaque fiche indique la stack et renvoie au site quand il est en ligne.
       </p>
     </header>
 
     {sortedProjects.length > 0 ? (
-      <>
-        {/* Filtres */}
-        <div class="projects__filters reveal" role="group" aria-label="Filtrer les projets">
-          <button class="projects__filter-btn active" data-filter="all" aria-pressed="true">Tous</button>
-          <button class="projects__filter-btn" data-filter="perso" aria-pressed="false">Perso</button>
-          <button class="projects__filter-btn" data-filter="pro" aria-pressed="false">Pro</button>
-        </div>
-
-        <ul class="projects__grid" aria-label="Liste des projets">
+      <div class="reg">
+        <fieldset class="filter">
+          <legend class="sr-only">Filtrer les projets</legend>
+          <input type="radio" name="project-filter" id="pf-all" checked />
+          <label for="pf-all">Tous <span>{sortedProjects.length}</span></label>
+          <input type="radio" name="project-filter" id="pf-pro" />
+          <label for="pf-pro">Pro <span>{proCount}</span></label>
+          <input type="radio" name="project-filter" id="pf-perso" />
+          <label for="pf-perso">Perso <span>{persoCount}</span></label>
+        </fieldset>
+        <p class="reg__count" aria-live="polite">
+          <span class="c-all">{sortedProjects.length} projets</span>
+          <span class="c-pro">{proCount} projets pro</span>
+          <span class="c-perso">{persoCount} projets perso</span>
+        </p>
+        <ul class="reg__list">
           {sortedProjects.map(project => (
-            <li data-type={project.data.type}>
-              <ProjectCard
-                title={project.data.title}
-                description={project.data.description}
-                tags={project.data.tags}
-                url={project.data.url}
-                github={project.data.github}
-                featured={project.data.featured}
-                image={project.data.image}
-                type={project.data.type}
-                client={project.data.client}
-                status={project.data.status}
-              />
-            </li>
+            <ProjectRow
+              title={project.data.title}
+              description={project.data.description}
+              tags={project.data.tags}
+              type={project.data.type}
+              client={project.data.client}
+              status={project.data.status}
+              url={project.data.url}
+              github={project.data.github}
+            />
           ))}
         </ul>
-      </>
+      </div>
     ) : (
-      <p class="projects__empty" role="status">
-        Des projets arrivent bientôt…
-      </p>
+      <p class="lead" role="status">Les fiches projets arrivent bientôt.</p>
     )}
-
   </div>
 </section>
 
 <style>
-  .projects__header {
-    max-width: 860px;
-  }
+  @layer components {
+    .filter {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-corner);
+    }
+    .filter input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .filter label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: var(--radius-corner-sm);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-fog);
+      cursor: pointer;
+      transition: background-color .2s var(--ease-out), color .2s var(--ease-out);
+    }
+    .filter label span { font: 500 12px/1 var(--font-mono); color: var(--color-mist); }
+    .filter label:hover { color: var(--color-bone); }
+    .filter input:checked + label { background: var(--color-bone); color: var(--color-ink-0); }
+    .filter input:checked + label span { color: #4A5170; }
+    .filter input:focus-visible + label { outline: 2px solid var(--color-signal); outline-offset: 2px; }
 
-  /* ── Filtres ── */
-  .projects__filters {
-    display: flex;
-    gap: var(--space-2);
-    margin-bottom: var(--space-8);
-  }
+    /* Les lignes viennent de ProjectRow : :global pour les atteindre depuis ce composant */
+    .reg:has(#pf-pro:checked) :global(.row[data-type="perso"]),
+    .reg:has(#pf-perso:checked) :global(.row[data-type="pro"]) { display: none; }
 
-  .projects__filter-btn {
-    font-size: var(--text-sm);
-    font-family: var(--font-mono);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-2);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    padding: 0.35rem 1rem;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    min-height: 36px;
-    transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-  }
+    .reg__count { margin-bottom: 10px; font: 500 12.5px/1 var(--font-mono); color: var(--color-mist); }
+    .reg__count .c-pro,
+    .reg__count .c-perso { display: none; }
+    .reg:has(#pf-pro:checked) .c-all,
+    .reg:has(#pf-perso:checked) .c-all { display: none; }
+    .reg:has(#pf-pro:checked) .c-pro,
+    .reg:has(#pf-perso:checked) .c-perso { display: inline; }
 
-  .projects__filter-btn:hover {
-    color: var(--color-text);
-    border-color: var(--color-border-hover);
-    background: var(--color-surface-2);
-  }
+    .reg__list { border-top: 1px solid var(--color-line); }
 
-  .projects__filter-btn.active {
-    color: var(--color-accent);
-    border-color: var(--color-border-accent);
-    background: var(--color-accent-light);
-  }
-
-  .projects__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-    gap: var(--space-6);
-    margin-bottom: var(--space-12);
-  }
-
-  /*
-    Trois colonnes en desktop, mais pas dans le container global.
-
-    Celui-ci plafonne à 1120px, soit 1040px utiles : trois colonnes y font
-    330px, largeur à laquelle les descriptions techniques partent sur une
-    dizaine de lignes et les cartes deviennent des colonnes étroites et très
-    hautes. La grille sort donc du container et se recentre sur le viewport,
-    plafonnée à 1400px, ce qui porte les colonnes à environ 420px.
-
-    L'entête de section reste, lui, dans le container : il s'aligne ainsi
-    avec les entêtes des autres sections.
-
-    Le débordement passe par des marges négatives calculées plutôt que par un
-    `transform`, qui aurait créé un contexte d'empilement au-dessus des <li>
-    animés au scroll.
-  */
-  @media (min-width: 1280px) {
-    /*
-      C'est le container de la section qui s'élargit, pas seulement la grille :
-      l'entête, les filtres et les cartes gardent ainsi le même bord gauche.
-      Élargir la seule grille laissait « Mes projets » 160px en retrait des
-      cartes, ce que l'œil lit comme un défaut d'alignement.
-    */
-    .projects__container { max-width: 1400px; }
-
-    .projects__grid { grid-template-columns: repeat(3, 1fr); }
-  }
-
-  /* Items masqués lors du filtrage */
-  .projects__grid li[hidden] {
-    display: none;
-  }
-
-  .projects__empty {
-    font-size: var(--text-lg);
-    color: var(--color-text-3);
-    text-align: center;
-    padding: var(--space-16) 0;
-  }
-
-  .projects__cta {
-    display: flex;
-    justify-content: center;
+    @container site (max-width: 379px) {
+      .filter { display: flex; }
+      .filter label { flex: 1 1 auto; justify-content: center; padding: 0 10px; }
+    }
   }
 </style>
-
-<script>
-  (function initProjectFilters() {
-    const btns  = document.querySelectorAll<HTMLButtonElement>('.projects__filter-btn');
-    const items = document.querySelectorAll<HTMLElement>('.projects__grid li[data-type]');
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const filter = btn.dataset.filter as string;
-
-        // Mettre à jour les boutons
-        btns.forEach(b => {
-          b.classList.toggle('active', b === btn);
-          b.setAttribute('aria-pressed', String(b === btn));
-        });
-
-        // Afficher / masquer les projets
-        items.forEach(item => {
-          const show = filter === 'all' || item.dataset.type === filter;
-          item.hidden = !show;
-        });
-      });
-    });
-  })();
-</script>

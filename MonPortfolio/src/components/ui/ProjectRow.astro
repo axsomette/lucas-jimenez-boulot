@@ -1,0 +1,169 @@
+---
+/**
+ * ProjectRow — une ligne du registre des projets.
+ * Fermée : titre, client, stack résumée, statut. Ouverte (<details>) : description, toute la stack, liens.
+ * Le curseur du logo marque la ligne survolée ou ouverte.
+ */
+interface Props {
+  title: string;
+  description: string;
+  tags: string[];
+  type: 'perso' | 'pro';
+  client?: string | undefined;
+  status: 'active' | 'wip' | 'offline';
+  url?: string | undefined;
+  github?: string | undefined;
+}
+
+interface StatusInfo {
+  label: string;
+  tone: 'on' | 'wip' | 'off';
+}
+
+const { title, description, tags, type, client, status, url, github } = Astro.props;
+
+const meta: string = type === 'pro' ? `${client ?? 'Agence'} · Pro` : 'Projet perso';
+const stack: string = tags.slice(0, 4).join(' · ');
+
+/** Un projet « actif » n'affiche « En ligne » que s'il a une adresse publique. */
+const statusInfo: StatusInfo | undefined =
+  status === 'wip' ? { label: 'En cours', tone: 'wip' }
+  : status === 'offline' ? { label: 'Hors ligne', tone: 'off' }
+  : url ? { label: 'En ligne', tone: 'on' }
+  : undefined;
+
+const host: string | undefined = url ? new URL(url).hostname.replace(/^www\./, '') : undefined;
+---
+
+<li class="row" data-type={type}>
+  <details>
+    <summary>
+      <span class="row__title">{title}</span>
+      <span class="row__meta">{meta}</span>
+      <span class="row__stack">{stack}</span>
+      {statusInfo && <span class={`row__status row__status--${statusInfo.tone}`}>{statusInfo.label}</span>}
+      <span class="row__chev" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" /></svg>
+      </span>
+    </summary>
+    <div class="row__body">
+      <p>{description}</p>
+      <ul class="tags" aria-label="Stack technique">
+        {tags.map(tag => <li class="tag">{tag}</li>)}
+      </ul>
+      {(url || github) && (
+        <div class="row__links">
+          {url && (
+            <a class="link" href={url} target="_blank" rel="noopener noreferrer">
+              Voir le site
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <span class="sr-only">{host} (nouvel onglet)</span>
+            </a>
+          )}
+          {github && (
+            <a class="link" href={github} target="_blank" rel="noopener noreferrer">
+              Code source
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <span class="sr-only">(nouvel onglet)</span>
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  </details>
+</li>
+
+<style>
+  @layer components {
+    .row { border-bottom: 1px solid var(--color-line); }
+
+    summary {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "title chev" "meta status" "stack stack";
+      gap: 6px 16px;
+      align-items: center;
+      padding: 20px 4px;
+      list-style: none;
+      cursor: pointer;
+      transition: background-color .2s var(--ease-out);
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary:focus-visible { outline-offset: -2px; }
+
+    /* padding-right : la place du décalage de 18 px, pour ne jamais mordre sur la colonne voisine */
+    .row__title {
+      grid-area: title;
+      position: relative;
+      min-width: 0;
+      padding-right: 18px;
+      font: 700 clamp(19px, 2.3cqi, 26px)/1.15 var(--font-display);
+      font-stretch: 110%;
+      letter-spacing: -.015em;
+      transition: transform .25s var(--ease-out);
+    }
+    .row__title::before {
+      content: "";
+      position: absolute;
+      left: -18px;
+      top: .12em;
+      width: .36em;
+      height: .8em;
+      background: var(--color-signal);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .row__meta { grid-area: meta; font: 500 12.5px/1.4 var(--font-mono); letter-spacing: .04em; color: var(--color-mist); }
+    .row__stack { grid-area: stack; min-width: 0; font-size: 14.5px; color: var(--color-fog); }
+
+    .row__status {
+      grid-area: status;
+      justify-self: end;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font: 500 12.5px/1 var(--font-mono);
+      color: var(--color-fog);
+      white-space: nowrap;
+    }
+    .row__status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--color-mist); }
+    .row__status--on::before { background: var(--color-ok); }
+    .row__status--wip::before { width: 5px; height: 10px; border-radius: 0; background: var(--color-signal); }
+    .row__status--off { color: var(--color-mist); }
+    .row__status--off::before { background: transparent; border: 1.5px solid var(--color-mist); }
+
+    .row__chev { grid-area: chev; display: grid; place-items: center; width: 28px; height: 28px; color: var(--color-mist); transition: transform .25s var(--ease-out), color .2s; }
+    .row__chev svg { width: 16px; height: 16px; }
+
+    details[open] .row__chev { transform: rotate(45deg); color: var(--color-signal); }
+    details[open] .row__title { transform: translateX(18px); }
+    details[open] .row__title::before { opacity: 1; }
+
+    .row__body { display: grid; gap: 18px; padding: 4px 4px 28px; animation: fade .3s var(--ease-out); }
+    .row__body p { max-width: 70ch; color: var(--color-fog); }
+    .row__links { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+
+    @media (hover: hover) {
+      summary:hover { background: var(--color-ink-1); }
+      summary:hover .row__title { transform: translateX(18px); }
+      summary:hover .row__title::before { opacity: 1; }
+      summary:hover .row__chev { color: var(--color-bone); }
+    }
+
+    @container site (min-width: 600px) {
+      summary { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "title status chev" "meta meta ." "stack stack ."; padding: 22px 8px; }
+    }
+    @container site (min-width: 960px) {
+      summary {
+        grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr) minmax(0, 2.2fr) 112px 28px;
+        grid-template-areas: "title meta stack status chev";
+        gap: 24px;
+        padding: 24px 12px;
+      }
+      .row__status { justify-self: start; }
+      .row__body { grid-template-columns: minmax(0, 2.3fr) minmax(0, 3.2fr); column-gap: 24px; padding: 0 12px 32px; }
+      .row__body > * { grid-column: 2; }
+    }
+  }
+</style>

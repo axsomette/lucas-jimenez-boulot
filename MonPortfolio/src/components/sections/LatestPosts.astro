@@ -25,10 +25,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <ul class="posts">
         {latestPosts.map(post => (
           <li class="post">
-            <a href={`${base}/blog/${post.slug}/`}>
+            <a href={`${base}/blog/${post.id}/`}>
               <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, 'short')}</time>
               <span class="post__title">{post.data.title}</span>
-              <span class="post__time">{readingTime(post.body)} min</span>
+              <span class="post__time">{readingTime(post.body ?? '')} min</span>
               <svg class="post__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
             </a>
           </li>

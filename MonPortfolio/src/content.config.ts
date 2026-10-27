@@ -1,11 +1,21 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+/**
+ * Collections — Content Layer API (Astro 6+).
+ * Le loader glob dérive l'id de chaque entrée du nom de fichier : `drupal-migration.md` → `drupal-migration`,
+ * ce qui garde les URL /blog/<id>/ identiques à celles de l'ancienne API (post.slug).
+ * Les fichiers préfixés par « _ » sont ignorés (brouillons de travail).
+ */
+const contentFiles = (folder: string) => glob({ pattern: '**/[^_]*.{md,mdx}', base: `./src/content/${folder}` });
 
 /**
  * Collection : projets
  * Schéma Zod typé — respecte la convention /new-project
  */
 const projectsCollection = defineCollection({
-  type: 'content',
+  loader: contentFiles('projects'),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -19,13 +29,13 @@ const projectsCollection = defineCollection({
     image: z.string().optional(),
     /** 'wip' = en cours, 'offline' = hors ligne, 'active' = en ligne (défaut) */
     status: z.enum(['active', 'wip', 'offline']).optional().default('active'),
-    url: z.string().url().optional(),
-    github: z.string().url().optional(),
+    url: z.url().optional(),
+    github: z.url().optional(),
   }),
 });
 
 const experiencesCollection = defineCollection({
-  type: 'content',
+  loader: contentFiles('experiences'),
   schema: z.object({
     role: z.string(),
     company: z.string(),
@@ -44,7 +54,7 @@ const experiencesCollection = defineCollection({
  * Articles techniques — frontmatter typé
  */
 const blogCollection = defineCollection({
-  type: 'content',
+  loader: contentFiles('blog'),
   schema: z.object({
     title:    z.string(),
     date:     z.date(),

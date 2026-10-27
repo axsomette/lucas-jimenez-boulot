@@ -28,3 +28,6 @@ Thumbs.db
 
 # Tests
 coverage/
+
+# Rapports d'audit de sécurité : jamais commités
+security-reports/

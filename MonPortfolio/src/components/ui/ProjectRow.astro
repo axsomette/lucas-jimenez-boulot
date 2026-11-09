@@ -13,6 +13,8 @@ interface Props {
   status: 'active' | 'wip' | 'offline';
   url?: string | undefined;
   github?: string | undefined;
+  /** Page du portfolio consacrée au projet, relative à la base (« lucraft/ ») */
+  page?: string | undefined;
 }
 
 interface StatusInfo {
@@ -20,7 +22,9 @@ interface StatusInfo {
   tone: 'on' | 'wip' | 'off';
 }
 
-const { title, description, tags, type, client, status, url, github } = Astro.props;
+const { title, description, tags, type, client, status, url, github, page } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pageHref: string | undefined = page ? `${base}/${page.replace(/^\//, '')}` : undefined;
 
 const meta: string = type === 'pro' ? `${client ?? 'Agence'} · Pro` : 'Projet perso';
 const stack: string = tags.slice(0, 4).join(' · ');
@@ -29,7 +33,7 @@ const stack: string = tags.slice(0, 4).join(' · ');
 const statusInfo: StatusInfo | undefined =
   status === 'wip' ? { label: 'En cours', tone: 'wip' }
   : status === 'offline' ? { label: 'Hors ligne', tone: 'off' }
-  : url ? { label: 'En ligne', tone: 'on' }
+  : url || page ? { label: 'En ligne', tone: 'on' }
   : undefined;
 
 const host: string | undefined = url ? new URL(url).hostname.replace(/^www\./, '') : undefined;
@@ -51,8 +55,14 @@ const host: string | undefined = url ? new URL(url).hostname.replace(/^www\./, '
       <ul class="tags" aria-label="Stack technique">
         {tags.map(tag => <li class="tag">{tag}</li>)}
       </ul>
-      {(url || github) && (
+      {(pageHref || url || github) && (
         <div class="row__links">
+          {pageHref && (
+            <a class="link" href={pageHref}>
+              Voir la page du projet
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          )}
           {url && (
             <a class="link" href={url} target="_blank" rel="noopener noreferrer">
               Voir le site

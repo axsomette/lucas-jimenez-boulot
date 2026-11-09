@@ -31,6 +31,8 @@ const projectsCollection = defineCollection({
     status: z.enum(['active', 'wip', 'offline']).optional().default('active'),
     url: z.url().optional(),
     github: z.url().optional(),
+    /** Page du portfolio consacrée au projet, relative à la base du site (ex. « lucraft/ ») */
+    page: z.string().optional(),
   }),
 });
 

@@ -1,0 +1,471 @@
+---
+/**
+ * Lucraft — la page de ma suite d'apps créatives.
+ * Entrée : les icônes défilent comme sous presse, puis le rideau se lève (une fois par session).
+ * La suite se déploie depuis une pile au centre ; le launcher relie les apps à Claude.
+ * Sans JS ou avec « réduire les animations », tout est visible et immobile.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+type Kind = 'ready' | 'beta' | 'soon';
+
+interface App {
+  name: string;
+  use: string;
+  icon?: string;
+  kind: Kind;
+}
+
+interface Gain {
+  label: string;
+  title: string;
+  text: string;
+}
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const icon = (file: string): string => `${base}/lucraft/${file}.webp`;
+const repo = 'https://github.com/axsomette/lucraft-releases';
+
+const apps: App[] = [
+  { name: 'PhotoLucraft', use: "Retouche et composition d'images", icon: 'photolucraft', kind: 'ready' },
+  { name: 'VectorLucraft', use: 'Illustration vectorielle, logos', icon: 'vectorlucraft', kind: 'ready' },
+  { name: 'FilmLucraft', use: 'Montage vidéo, sous-titres, voix off', icon: 'filmlucraft', kind: 'ready' },
+  { name: 'LightLucraft', use: 'Photothèque et développement RAW', icon: 'lightlucraft', kind: 'ready' },
+  { name: 'PdfLucraft', use: 'Édition de PDF, OCR', icon: 'pdflucraft', kind: 'ready' },
+  { name: 'EffectLucraft', use: 'Motion design et effets visuels', icon: 'effectlucraft', kind: 'ready' },
+  { name: 'DesignLucraft', use: 'Mise en page, print', icon: 'designlucraft', kind: 'ready' },
+  { name: 'WordLucraft', use: 'Traitement de texte', icon: 'wordlucraft', kind: 'ready' },
+  { name: 'DeckLucraft', use: 'Présentations', icon: 'decklucraft', kind: 'ready' },
+  { name: 'GridLucraft', use: 'Tableur et données', icon: 'gridlucraft', kind: 'ready' },
+  { name: 'CADLucraft', use: 'Dessin technique 2D et 3D', icon: 'cadlucraft', kind: 'ready' },
+  { name: 'SoundLucraft', use: 'Enregistrement, montage et mixage audio', icon: 'soundlucraft', kind: 'ready' },
+  { name: 'FigLucraft', use: "Design d'interfaces et prototypage", icon: 'figlucraft', kind: 'ready' },
+  { name: 'TextureLucraft', use: 'Peinture de textures 3D', icon: 'texturelucraft', kind: 'beta' },
+  { name: 'MaterialLucraft', use: 'Matériaux procéduraux par nœuds', icon: 'materiallucraft', kind: 'beta' },
+  { name: 'AniLucraft', use: 'Animation vectorielle 2D', icon: 'anilucraft', kind: 'beta' },
+  { name: 'Lucraft Anything', use: "L'IA étudie un site ou une app et en construit sa version avec Claude Code", icon: 'lucraft-anything', kind: 'beta' },
+  { name: 'ArchiLucraft', use: 'Relecture et correction de maquettes IFC', kind: 'soon' },
+  { name: 'ConstructLucraft', use: 'Conception BIM pour architectes', kind: 'soon' },
+  { name: 'Volumétrie 3D', use: 'Volumes 3D rapides, nom à venir', kind: 'soon' },
+  { name: 'Annotation de plans', use: 'Annoter des plans PDF, nom à venir', kind: 'soon' },
+];
+
+const count = (kind?: Kind): number => apps.filter(app => !kind || app.kind === kind).length;
+const ready: number = count('ready');
+const beta: number = count('beta');
+const shipped: number = ready + beta;
+
+/** Position de départ de chaque carte : empilée au centre de la grille de 7 colonnes. */
+const COLS = 7;
+const rows: number = Math.ceil(apps.length / COLS);
+const deckStyle = (i: number): string => {
+  const dc: number = (COLS - 1) / 2 - (i % COLS);
+  const dr: number = (rows - 1) / 2 - Math.floor(i / COLS);
+  const rot: number = ((i * 37) % 11) - 5;
+  return `--i:${i};--dc:${dc};--dr:${dr};--rot:${rot}deg;--z:${apps.length - i}`;
+};
+
+const strip: string[] = apps.flatMap(app => (app.icon ? [icon(app.icon)] : []));
+const flowIcons: string[] = ['photolucraft', 'vectorlucraft', 'filmlucraft', 'designlucraft', 'soundlucraft', 'anilucraft'].map(icon);
+
+const gains: Gain[] = [
+  { label: 'Launcher', title: 'Toute la suite en une app', text: "Il installe les apps, les met à jour tout seul (versions précompilées pour Mac Apple et Intel, intégrité vérifiée par empreinte SHA-256) et relie chaque app à Claude en un clic, dans Claude Desktop et Claude Code." },
+  { label: 'Sécurité', title: 'Des garde-fous partout', text: "Les failles sont corrigées ou évaluées une par une. Celle, critique, de la bibliothèque zip est corrigée dans 6 apps, alors que la version d'origine ne l'était pas encore au 9 novembre 2026. Un verrou réseau : le launcher ne parle qu'à sa source. Mises à jour automatiques et liens externes de l'origine retirés. Apps hors ligne par défaut, liste fermée de services pour les fonctions en ligne." },
+  { label: 'Reprise', title: 'Chaque semaine, automatiquement', text: "Chaque nouvelle version de l'origine est récupérée, renommée, testée (plus de 60 000 tests par reprise) et publiée en quelques heures. Une nouvelle app rejoint la suite dans la journée de sa sortie." },
+  { label: 'Correctifs', title: 'Des corrections propres', text: 'Des tests qui ne compilaient pas sur Mac, le contrôle de signature des images disque, le plein écran du launcher, entre autres.' },
+  { label: 'Icônes', title: 'Neuf animaux gravés', text: "Chaque app a son animal gravé ; j'ai dessiné ceux des nouvelles apps et de cinq autres." },
+  { label: 'Bêta', title: 'Un badge honnête', text: "Les apps encore jeunes portent un badge BÊTA, pour savoir à quoi s'attendre." },
+];
+
+const filters: { id: string; label: string; kind?: Kind }[] = [
+  { id: 'lf-all', label: 'Toutes' },
+  { id: 'lf-ready', label: 'Disponibles', kind: 'ready' },
+  { id: 'lf-beta', label: 'Bêta', kind: 'beta' },
+  { id: 'lf-soon', label: 'Bientôt', kind: 'soon' },
+];
+---
+
+<BaseLayout
+  title="Lucraft · Ma suite d'apps créatives pilotée par Claude"
+  description={`Lucraft : ${shipped} apps créatives pour Mac, un launcher qui les installe et les met à jour, et Claude aux commandes. Des logiciels libres repris, renommés, sécurisés et réunis par Lucas Jimenez Boulot.`}
+>
+  <script is:inline slot="head">
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('lc-js');
+      try {
+        if (sessionStorage.getItem('lc-boot')) root.classList.add('lc-seen');
+        else sessionStorage.setItem('lc-boot', '1');
+      } catch (e) { root.classList.add('lc-seen'); }
+    })();
+  </script>
+
+  <div class="lc-boot" aria-hidden="true">
+    <div>
+      <div class="lc-boot__win">
+        <div class="lc-boot__strip" style={`--frames:${strip.length}`}>
+          {strip.map(src => <img src={src} alt="" width="112" height="112" />)}
+          <img src={`${base}/lucraft/lucraft-mark.svg`} alt="" width="112" height="112" />
+        </div>
+      </div>
+      <p class="lc-boot__cap">LUCRAFT<span class="caret"></span></p>
+    </div>
+  </div>
+
+  <section class="lc-hero" aria-labelledby="lc-title">
+    <div class="container">
+      <p class="kicker lc-hero__eyebrow">
+        <span>Lucraft</span>
+        <span>Projet perso</span>
+        <span>Mac Apple et Intel</span>
+      </p>
+
+      <h1 class="lc-hero__title" id="lc-title">
+        <span class="ln">Dix-sept apps.</span>
+        <span class="ln">Un launcher.</span>
+        <span class="ln">Claude aux commandes<span class="caret" aria-hidden="true"></span></span>
+      </h1>
+
+      <div class="lc-hero__grid">
+        <div class="lc-hero__lead">
+          <p>Lucraft, c'est ma suite d'apps créatives. J'ai repris des logiciels créatifs libres, je les ai <strong>renommés, sécurisés, reliés à Claude</strong> et réunis dans une suite qui s'installe en une ligne.</p>
+          <div class="lc-actions">
+            <a href={repo} class="btn btn--signal" target="_blank" rel="noopener noreferrer">
+              Voir le dépôt sur GitHub
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <span class="sr-only">(nouvel onglet)</span>
+            </a>
+            <a href="#lc-suite" class="btn btn--line">Découvrir les apps</a>
+          </div>
+        </div>
+
+        <dl class="lc-spec">
+          <div><dt>Apps</dt><dd>{ready} disponibles, {beta} en bêta, d'autres en préparation</dd></div>
+          <div><dt>Mac</dt><dd>macOS 11 ou plus, puce Apple ou Intel</dd></div>
+          <div><dt>Claude</dt><dd>Claude Desktop et Claude Code, chaque app reliée en un clic</dd></div>
+          <div><dt>Prix</dt><dd>Gratuit, sans compte ni abonnement</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="lc-suite" class="section" aria-labelledby="lc-suite-title">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="kicker">La suite</p>
+        <h2 class="title" id="lc-suite-title">Une app, un animal gravé</h2>
+        <p class="lead">Photo, vecteur, vidéo, mise en page, son, 3D. Chaque app a son icône gravée ; survolez-en une pour la voir s'animer.</p>
+      </header>
+
+      <div class="lc-suite">
+        <fieldset class="lc-filter">
+          <legend class="sr-only">Filtrer les apps</legend>
+          {filters.map((f, i) => (
+            <>
+              <input type="radio" name="lc-filter" id={f.id} checked={i === 0} />
+              <label for={f.id}>{f.label} <span>{count(f.kind)}</span></label>
+            </>
+          ))}
+        </fieldset>
+
+        <ul class="lc-deck">
+          {apps.map((app, i) => (
+            <li class="lc-tile" data-kind={app.kind} style={deckStyle(i)}>
+              {app.icon
+                ? <span class="lc-ico"><img src={icon(app.icon)} alt="" width="88" height="88" loading="lazy" decoding="async" /></span>
+                : <span class="lc-ico lc-ico--soon" aria-hidden="true">?</span>}
+              <span class="lc-tile__name">{app.name}</span>
+              <span class="lc-tile__use">{app.use}</span>
+              {app.kind === 'beta' && <span class="lc-badge lc-badge--beta">Bêta</span>}
+              {app.kind === 'soon' && <span class="lc-badge">Bientôt</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section band" aria-labelledby="lc-launcher-title">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="kicker">Le launcher</p>
+        <h2 class="title" id="lc-launcher-title">Il installe, met à jour et branche Claude</h2>
+        <p class="lead">Une seule app à ouvrir. Elle installe la suite, la garde à jour toute seule et relie chaque app à Claude en un clic.</p>
+      </header>
+
+      <div class="lc-flow" role="img" aria-label="Les apps passent par Lucraft Launcher, qui les relie à Claude Desktop et à Claude Code.">
+        <div class="lc-node lc-node--apps">
+          {flowIcons.map(src => <img src={src} alt="" width="56" height="56" loading="lazy" decoding="async" />)}
+        </div>
+        <span class="lc-wire" aria-hidden="true"></span>
+        <div class="lc-node lc-node--launcher">
+          <img src={`${base}/lucraft/lucraft-mark.svg`} alt="" width="40" height="40" />
+          <div>
+            <p class="lc-node__title">Lucraft Launcher</p>
+            <p class="lc-node__sub">vérifie chaque fichier (SHA-256)</p>
+          </div>
+        </div>
+        <span class="lc-wire" aria-hidden="true"></span>
+        <div class="lc-targets">
+          <p class="lc-node">Claude Desktop</p>
+          <p class="lc-node">Claude Code</p>
+        </div>
+      </div>
+      <p class="lc-note">Chaque app embarque un serveur MCP : Claude ouvre, crée, retouche et exporte directement dans la vraie app.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="lc-gains-title">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="kicker">Repris et amélioré</p>
+        <h2 class="title" id="lc-gains-title">Ce que j'y ai apporté</h2>
+        <p class="lead">Les apps viennent de logiciels créatifs libres. Voici ce que j'ai construit autour d'elles.</p>
+      </header>
+      <dl class="lc-spec lc-gains">
+        {gains.map(g => (
+          <div class="reveal"><dt>{g.label}</dt><dd><strong>{g.title}</strong>{g.text}</dd></div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="section band lc-repo" aria-labelledby="lc-repo-title">
+    <div class="container">
+      <p class="kicker">Le dépôt</p>
+      <h2 class="lc-repo__title" id="lc-repo-title">Tout est<br />sur GitHub<span class="caret" aria-hidden="true"></span></h2>
+      <p class="lead">Les versions prêtes à installer pour Mac, la commande d'installation et la liste des apps sont sur le dépôt public.</p>
+      <div class="lc-actions">
+        <a href={repo} class="btn btn--signal" target="_blank" rel="noopener noreferrer">
+          Voir le dépôt sur GitHub
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <span class="sr-only">(nouvel onglet)</span>
+        </a>
+        <a href={`${repo}/releases/latest`} class="btn btn--line" target="_blank" rel="noopener noreferrer">
+          Dernière version
+          <span class="sr-only">(nouvel onglet)</span>
+        </a>
+      </div>
+      <p class="lc-repo__url mono">github.com/axsomette/lucraft-releases</p>
+      <p class="lc-credit">Construit sur des briques open source, livrées avec leurs licences.</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Déploie la suite et trace les fils quand ils arrivent à l'écran. Sans JS, tout est déjà en place.
+  const targets = document.querySelectorAll<HTMLElement>('.lc-deck, .lc-flow');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-open');
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.2 });
+    targets.forEach(el => io.observe(el));
+  } else {
+    targets.forEach(el => el.classList.add('is-open'));
+  }
+</script>
+
+<style>
+  @layer components {
+    /* ── Entrée ── */
+    :global(html.lc-js:not(.lc-seen)) { --lc-delay: 1.9s; }
+    .lc-boot { display: none; }
+    :global(html.lc-js:not(.lc-seen)) .lc-boot {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-boot);
+      display: grid;
+      place-items: center;
+      background: var(--color-ink-0);
+      pointer-events: none;
+      animation: boot-out .55s var(--ease-inout) 1.9s forwards;
+    }
+    .lc-boot__win { width: 112px; height: 112px; overflow: hidden; }
+    .lc-boot__strip { display: flex; flex-direction: column; animation: lc-press 1.5s steps(var(--frames), end) .15s forwards; }
+    .lc-boot__strip img { width: 112px; height: 112px; flex: none; }
+    .lc-boot__cap { margin-top: 22px; text-align: center; font: 500 12.5px/1 var(--font-mono); letter-spacing: .14em; color: var(--color-fog); }
+    @keyframes lc-press { to { transform: translateY(calc(var(--frames) * -112px)); } }
+
+    /* ── Hero ── */
+    .lc-hero { padding-block: clamp(48px, 9cqi, 128px) clamp(64px, 9cqi, 120px); }
+    .lc-hero__eyebrow { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: clamp(20px, 3cqi, 36px); }
+    .lc-hero__eyebrow span:not(:first-child) { color: var(--color-mist); }
+    .lc-hero__eyebrow span:not(:first-child)::before { content: "/"; margin-right: 18px; color: var(--color-line-strong); }
+    .lc-hero__title {
+      font-family: var(--font-display);
+      font-stretch: 118%;
+      font-weight: 850;
+      font-size: clamp(1.5rem, 7.2cqi, 6.25rem);
+      line-height: .94;
+      letter-spacing: -.035em;
+      text-transform: uppercase;
+    }
+    .lc-hero__title .ln { display: block; animation: rise .8s var(--ease-out) both; animation-delay: calc(var(--lc-delay, 0s) + .1s); }
+    .lc-hero__title .ln:nth-child(2) { animation-delay: calc(var(--lc-delay, 0s) + .18s); }
+    .lc-hero__title .ln:nth-child(3) { animation-delay: calc(var(--lc-delay, 0s) + .26s); color: var(--color-fog); }
+    .lc-hero__grid { display: grid; gap: 40px; margin-top: clamp(36px, 6cqi, 80px); animation: fade .8s var(--ease-out) both; animation-delay: calc(var(--lc-delay, 0s) + .4s); }
+    .lc-hero__lead { display: grid; gap: 28px; align-content: start; }
+    .lc-hero__lead p { max-width: 40ch; font-size: clamp(17px, 1.9cqi, 21px); line-height: 1.55; color: var(--color-fog); text-wrap: pretty; }
+    .lc-hero__lead strong { color: var(--color-bone); font-weight: 600; }
+    .lc-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .lc-spec { border-top: 1px solid var(--color-line); }
+    .lc-spec > div { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--color-line); }
+    .lc-spec dt { font: 500 12px/1.4 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--color-mist); }
+    .lc-spec dd { font-size: 16px; line-height: 1.45; }
+
+    /* ── La suite ── */
+    .lc-filter { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; margin-bottom: 24px; border: 1px solid var(--color-line); border-radius: var(--radius-corner); }
+    .lc-filter input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .lc-filter label {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+      border-radius: var(--radius-corner-sm); font-size: 15px; font-weight: 600; color: var(--color-fog); cursor: pointer;
+      transition: background-color .2s var(--ease-out), color .2s var(--ease-out);
+    }
+    .lc-filter label span { font: 500 12px/1 var(--font-mono); color: var(--color-mist); }
+    .lc-filter label:hover { color: var(--color-bone); }
+    .lc-filter input:checked + label { background: var(--color-bone); color: var(--color-ink-0); }
+    .lc-filter input:checked + label span { color: #4A5170; }
+    .lc-filter input:focus-visible + label { outline: 2px solid var(--color-signal); outline-offset: 2px; }
+    .lc-suite:has(#lf-ready:checked) .lc-tile:not([data-kind="ready"]),
+    .lc-suite:has(#lf-beta:checked) .lc-tile:not([data-kind="beta"]),
+    .lc-suite:has(#lf-soon:checked) .lc-tile:not([data-kind="soon"]) { display: none; }
+
+    .lc-deck { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .lc-tile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px;
+      background: var(--color-ink-1);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-corner);
+      transition: transform 1.1s var(--ease-out), opacity .6s var(--ease-out), border-color .25s var(--ease-out);
+      transition-delay: calc(var(--i) * 35ms), calc(var(--i) * 35ms), 0s;
+    }
+    :global(html.lc-js) .lc-deck:not(.is-open) .lc-tile { opacity: 0; transform: translateY(24px); }
+    .lc-ico { position: relative; display: block; width: 88px; height: 88px; overflow: hidden; border-radius: 20px; }
+    .lc-ico img { width: 88px; height: 88px; transition: transform .5s var(--ease-out); }
+    /* Un trait de burin passe sur la gravure */
+    .lc-ico::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: repeating-linear-gradient(115deg, transparent 0 7px, rgb(236 232 223 / .42) 7px 8px);
+      transform: translateX(-130%);
+      pointer-events: none;
+    }
+    .lc-ico--soon { display: grid; place-items: center; border: 1.5px dashed var(--color-line-strong); font: 500 22px var(--font-mono); color: var(--color-mist); }
+    .lc-ico--soon::after { content: none; }
+    .lc-tile__name {
+      position: relative;
+      font: 700 18px/1.15 var(--font-display);
+      font-stretch: 110%;
+      letter-spacing: -.01em;
+      overflow-wrap: anywhere;
+      transition: transform .25s var(--ease-out);
+    }
+    /* Deux colonnes sur téléphone, sept sur grand écran : le nom se resserre plutôt que de se couper */
+    @container site (max-width: 699px) {
+      .lc-tile { padding: 14px; }
+      .lc-tile__name { font-size: 15px; font-stretch: 100%; }
+    }
+    @container site (min-width: 1100px) {
+      .lc-tile__name { font-size: clamp(15px, 1.3cqi, 18px); font-stretch: 100%; }
+    }
+    .lc-tile__name::before { content: ""; position: absolute; left: -14px; top: .12em; width: .36em; height: .8em; background: var(--color-signal); opacity: 0; transition: opacity .15s; }
+    .lc-tile__use { font-size: 14px; line-height: 1.45; color: var(--color-fog); }
+    .lc-badge {
+      align-self: flex-start;
+      padding: 5px 8px;
+      border: 1px solid currentColor;
+      border-radius: 2px 2px 8px 2px;
+      font: 500 11px/1 var(--font-mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--color-mist);
+    }
+    .lc-badge--beta { color: var(--color-signal); }
+
+    @media (hover: hover) {
+      .lc-tile:hover { border-color: var(--color-line-hover); }
+      .lc-tile:hover .lc-ico img { transform: scale(1.06) rotate(-2deg); }
+      .lc-tile:hover .lc-ico::after { transform: translateX(130%); transition: transform .9s var(--ease-out); }
+      .lc-tile:hover .lc-tile__name { transform: translateX(14px); }
+      .lc-tile:hover .lc-tile__name::before { opacity: 1; }
+    }
+
+    /* ── Le launcher ── */
+    .lc-flow { display: grid; gap: 20px; align-items: center; }
+    .lc-node { padding: 20px; background: var(--color-ink-0); border: 1px solid var(--color-line); border-radius: var(--radius-corner); font-weight: 600; }
+    .lc-node--apps { display: grid; grid-template-columns: repeat(3, 56px); gap: 10px; justify-content: center; }
+    .lc-node--launcher { display: flex; align-items: center; gap: 14px; border-color: var(--color-signal); }
+    .lc-node__title { font: 700 18px/1.2 var(--font-display); font-stretch: 110%; }
+    .lc-node__sub { font: 500 12px/1.5 var(--font-mono); color: var(--color-mist); }
+    .lc-targets { display: grid; gap: 10px; }
+    .lc-targets .lc-node { padding: 14px 18px; }
+    .lc-wire { position: relative; justify-self: center; width: 1px; height: 40px; background: var(--color-line-strong); }
+    .lc-note { margin-top: 28px; max-width: 62ch; font-size: 16px; color: var(--color-fog); }
+
+    /* ── Apports ── */
+    .lc-gains dd { color: var(--color-fog); }
+    .lc-gains dd strong { display: block; margin-bottom: 4px; font: 700 20px/1.2 var(--font-display); font-stretch: 108%; color: var(--color-bone); }
+    .lc-gains > div { padding: 20px 0; }
+
+    /* ── Dépôt ── */
+    .lc-repo .container { display: grid; gap: 28px; justify-items: start; }
+    .lc-repo__title {
+      font-family: var(--font-display);
+      font-stretch: 118%;
+      font-weight: 850;
+      font-size: clamp(1.75rem, 6cqi, 5.25rem);
+      line-height: .94;
+      letter-spacing: -.035em;
+      text-transform: uppercase;
+    }
+    .lc-repo__url { font-size: 12.5px; color: var(--color-mist); }
+    .lc-credit { margin-top: 24px; font-size: 14px; color: var(--color-mist); }
+
+    @container site (max-width: 599px) {
+      .lc-hero__title { font-stretch: 100%; font-size: clamp(1.5rem, 8.4cqi, 3.5rem); }
+    }
+    @container site (min-width: 600px) {
+      .lc-spec > div { grid-template-columns: 130px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+    }
+    @container site (min-width: 700px) {
+      .lc-deck { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @container site (min-width: 960px) {
+      .lc-hero__grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 64px; align-items: start; }
+      .lc-gains > div { grid-template-columns: 200px minmax(0, 1fr); gap: 24px; }
+      .lc-flow { grid-template-columns: minmax(0, 1.1fr) minmax(40px, .5fr) minmax(0, 1fr) minmax(40px, .5fr) minmax(0, 1fr); }
+      .lc-wire { justify-self: stretch; width: auto; height: 1px; transform-origin: left; }
+      :global(html.lc-js) .lc-flow:not(.is-open) .lc-wire { transform: scaleX(0); }
+      .lc-wire { transition: transform 1.2s var(--ease-inout) .3s; }
+      .lc-wire::after { content: ""; position: absolute; top: -6px; left: 0; width: 6px; height: 12px; background: var(--color-signal); opacity: 0; }
+      .lc-flow.is-open .lc-wire::after { animation: lc-pulse 2.4s var(--ease-inout) 1.6s infinite; }
+    }
+    @container site (min-width: 1100px) {
+      .lc-deck { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+      /* Fermée, la suite est une pile au centre ; ouverte, chaque carte rejoint sa place */
+      :global(html.lc-js) .lc-deck:not(.is-open) .lc-tile {
+        opacity: 1;
+        z-index: var(--z);
+        transform: translate(calc(var(--dc) * (100% + 16px)), calc(var(--dr) * (100% + 16px))) rotate(var(--rot)) scale(.92);
+      }
+      /* Un filtre actif montre une grille déjà rangée */
+      .lc-suite:has(input:not(#lf-all):checked) .lc-tile { transform: none !important; opacity: 1 !important; }
+    }
+    @keyframes lc-pulse { 0% { left: 0; opacity: 0; } 10%, 90% { opacity: 1; } 100% { left: calc(100% - 6px); opacity: 0; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lc-boot { display: none !important; }
+      .lc-tile, .lc-wire { transform: none !important; opacity: 1 !important; }
+    }
+  }
+</style>

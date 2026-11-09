@@ -12,8 +12,8 @@ interface NavLink {
   label: string;
   /** Repère discret affiché dans le menu mobile */
   hint?: string;
-  /** Lien vers une autre page (pas une ancre de l'accueil) */
-  page?: boolean;
+  /** Lien vers une autre page (pas une ancre de l'accueil) : le chemin qui la reconnaît */
+  page?: string;
 }
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -21,14 +21,15 @@ const projects = await getCollection('projects');
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const experiences = await getCollection('experiences');
 const since: number = Math.min(...experiences.map(xp => xp.data.startDate.getFullYear()));
-const onBlog: boolean = Astro.url.pathname.includes('/blog');
+const isCurrent = (link: NavLink): boolean => !!link.page && Astro.url.pathname.includes(link.page);
 
 const navLinks: NavLink[] = [
   { href: `${base}/#projets`,  label: 'Projets',  hint: `${projects.length} fiches` },
+  { href: `${base}/lucraft/`,  label: 'Lucraft',  hint: 'ma suite d\'apps', page: '/lucraft' },
   { href: `${base}/#parcours`, label: 'Parcours', hint: `depuis ${since}` },
   { href: `${base}/#apropos`,  label: 'À propos' },
   { href: `${base}/#ia`,       label: 'IA',       hint: 'outillage' },
-  { href: `${base}/blog/`,     label: 'Blog',     hint: `${posts.length} articles`, page: true },
+  { href: `${base}/blog/`,     label: 'Blog',     hint: `${posts.length} articles`, page: '/blog' },
 ];
 ---
 
@@ -46,7 +47,7 @@ const navLinks: NavLink[] = [
             <a
               href={link.href}
               data-page={link.page ? 'true' : undefined}
-              aria-current={link.page && onBlog ? 'page' : undefined}
+              aria-current={isCurrent(link) ? 'page' : undefined}
             >{link.label}</a>
           </li>
         ))}
@@ -65,7 +66,7 @@ const navLinks: NavLink[] = [
         <ul>
           {navLinks.map(link => (
             <li>
-              <a href={link.href} aria-current={link.page && onBlog ? 'page' : undefined}>
+              <a href={link.href} aria-current={isCurrent(link) ? 'page' : undefined}>
                 {link.label}
                 {link.hint && <span>{link.hint}</span>}
               </a>

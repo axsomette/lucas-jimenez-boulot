@@ -6,6 +6,7 @@
  * Sans JS ou avec « réduire les animations », tout est visible et immobile.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import suite from '../data/lucraft-apps.json';
 
 type Kind = 'ready' | 'beta' | 'soon';
 
@@ -26,29 +27,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const icon = (file: string): string => `${base}/lucraft/${file}.webp`;
 const repo = 'https://github.com/axsomette/lucraft-releases';
 
-const apps: App[] = [
-  { name: 'PhotoLucraft', use: "Retouche et composition d'images", icon: 'photolucraft', kind: 'ready' },
-  { name: 'VectorLucraft', use: 'Illustration vectorielle, logos', icon: 'vectorlucraft', kind: 'ready' },
-  { name: 'FilmLucraft', use: 'Montage vidéo, sous-titres, voix off', icon: 'filmlucraft', kind: 'ready' },
-  { name: 'LightLucraft', use: 'Photothèque et développement RAW', icon: 'lightlucraft', kind: 'ready' },
-  { name: 'PdfLucraft', use: 'Édition de PDF, OCR', icon: 'pdflucraft', kind: 'ready' },
-  { name: 'EffectLucraft', use: 'Motion design et effets visuels', icon: 'effectlucraft', kind: 'ready' },
-  { name: 'DesignLucraft', use: 'Mise en page, print', icon: 'designlucraft', kind: 'ready' },
-  { name: 'WordLucraft', use: 'Traitement de texte', icon: 'wordlucraft', kind: 'ready' },
-  { name: 'DeckLucraft', use: 'Présentations', icon: 'decklucraft', kind: 'ready' },
-  { name: 'GridLucraft', use: 'Tableur et données', icon: 'gridlucraft', kind: 'ready' },
-  { name: 'CADLucraft', use: 'Dessin technique 2D et 3D', icon: 'cadlucraft', kind: 'ready' },
-  { name: 'SoundLucraft', use: 'Enregistrement, montage et mixage audio', icon: 'soundlucraft', kind: 'ready' },
-  { name: 'FigLucraft', use: "Design d'interfaces et prototypage", icon: 'figlucraft', kind: 'ready' },
-  { name: 'TextureLucraft', use: 'Peinture de textures 3D', icon: 'texturelucraft', kind: 'beta' },
-  { name: 'MaterialLucraft', use: 'Matériaux procéduraux par nœuds', icon: 'materiallucraft', kind: 'beta' },
-  { name: 'AniLucraft', use: 'Animation vectorielle 2D', icon: 'anilucraft', kind: 'beta' },
-  { name: 'Lucraft Anything', use: "L'IA étudie un site ou une app et en construit sa version avec Claude Code", icon: 'lucraft-anything', kind: 'beta' },
-  { name: 'ArchiLucraft', use: 'Relecture et correction de maquettes IFC', kind: 'soon' },
-  { name: 'ConstructLucraft', use: 'Conception BIM pour architectes', kind: 'soon' },
-  { name: 'Volumétrie 3D', use: 'Volumes 3D rapides, nom à venir', kind: 'soon' },
-  { name: 'Annotation de plans', use: 'Annoter des plans PDF, nom à venir', kind: 'soon' },
-];
+const apps: App[] = suite.apps as App[];
 
 const count = (kind?: Kind): number => apps.filter(app => !kind || app.kind === kind).length;
 const ready: number = count('ready');
@@ -73,7 +52,7 @@ const gains: Gain[] = [
   { label: 'Sécurité', title: 'Des garde-fous partout', text: "Les failles sont corrigées ou évaluées une par une. Celle, critique, de la bibliothèque zip est corrigée dans 6 apps, alors que la version d'origine ne l'était pas encore au 9 novembre 2026. Un verrou réseau : le launcher ne parle qu'à sa source. Mises à jour automatiques et liens externes de l'origine retirés. Apps hors ligne par défaut, liste fermée de services pour les fonctions en ligne." },
   { label: 'Reprise', title: 'Chaque semaine, automatiquement', text: "Chaque nouvelle version de l'origine est récupérée, renommée, testée (plus de 60 000 tests par reprise) et publiée en quelques heures. Une nouvelle app rejoint la suite dans la journée de sa sortie." },
   { label: 'Correctifs', title: 'Des corrections propres', text: 'Des tests qui ne compilaient pas sur Mac, le contrôle de signature des images disque, le plein écran du launcher, entre autres.' },
-  { label: 'Icônes', title: 'Neuf animaux gravés', text: "Chaque app a son animal gravé ; j'ai dessiné ceux des nouvelles apps et de cinq autres." },
+  { label: 'Icônes', title: 'Gravées par un programme', text: "Une gravure sur bois par app, calculée par un script, sans IA : un objet du métier (objectif, bobine, plume, compas, truelle…) sur une tuile de couleur à elle." },
   { label: 'Bêta', title: 'Un badge honnête', text: "Les apps encore jeunes portent un badge BÊTA, pour savoir à quoi s'attendre." },
 ];
 
@@ -121,7 +100,7 @@ const filters: { id: string; label: string; kind?: Kind }[] = [
       </p>
 
       <h1 class="lc-hero__title" id="lc-title">
-        <span class="ln">Dix-sept apps.</span>
+        <span class="ln">{suite.countWord} apps.</span>
         <span class="ln">Un launcher.</span>
         <span class="ln">Claude aux commandes<span class="caret" aria-hidden="true"></span></span>
       </h1>
@@ -153,8 +132,8 @@ const filters: { id: string; label: string; kind?: Kind }[] = [
     <div class="container">
       <header class="section-head reveal">
         <p class="kicker">La suite</p>
-        <h2 class="title" id="lc-suite-title">Une app, un animal gravé</h2>
-        <p class="lead">Photo, vecteur, vidéo, mise en page, son, 3D. Chaque app a son icône gravée ; survolez-en une pour la voir s'animer.</p>
+        <h2 class="title" id="lc-suite-title">Une app, un objet gravé</h2>
+        <p class="lead">Photo, vecteur, vidéo, mise en page, son, 3D, architecture. Chaque app a son objet du métier, gravé ; survolez-en une pour la voir s'animer.</p>
       </header>
 
       <div class="lc-suite">

@@ -1,0 +1,130 @@
+{
+  "_doc": "Généré par lucraft-upstream/vitrine/generer.py (dépôt Lucraft) : ne pas modifier à la main.",
+  "countWord": "Dix-neuf",
+  "apps": [
+    {
+      "name": "PhotoLucraft",
+      "use": "Retouche et composition d'images",
+      "icon": "photolucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "VectorLucraft",
+      "use": "Illustration vectorielle, logos",
+      "icon": "vectorlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "FilmLucraft",
+      "use": "Montage vidéo, sous-titres, voix off",
+      "icon": "filmlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "LightLucraft",
+      "use": "Photothèque et développement RAW",
+      "icon": "lightlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "PdfLucraft",
+      "use": "Édition de PDF, OCR",
+      "icon": "pdflucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "EffectLucraft",
+      "use": "Motion design et effets visuels",
+      "icon": "effectlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "DesignLucraft",
+      "use": "Mise en page, print",
+      "icon": "designlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "WordLucraft",
+      "use": "Traitement de texte",
+      "icon": "wordlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "DeckLucraft",
+      "use": "Présentations",
+      "icon": "decklucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "GridLucraft",
+      "use": "Tableur et données",
+      "icon": "gridlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "CADLucraft",
+      "use": "Dessin technique 2D et 3D",
+      "icon": "cadlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "SoundLucraft",
+      "use": "Enregistrement, montage et mixage audio",
+      "icon": "soundlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "FigLucraft",
+      "use": "Design d'interfaces et prototypage",
+      "icon": "figlucraft",
+      "kind": "ready"
+    },
+    {
+      "name": "TextureLucraft",
+      "use": "Peinture de textures 3D",
+      "icon": "texturelucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "MaterialLucraft",
+      "use": "Matériaux procéduraux par nœuds",
+      "icon": "materiallucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "AniLucraft",
+      "use": "Animation vectorielle 2D",
+      "icon": "anilucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "Lucraft Anything",
+      "use": "L'IA étudie un site ou une app et en construit sa version avec Claude Code",
+      "icon": "lucraft-anything",
+      "kind": "beta"
+    },
+    {
+      "name": "ArchiLucraft",
+      "use": "Maquettes BIM : ouvrir, relire et corriger des fichiers IFC",
+      "icon": "archilucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "ConstructLucraft",
+      "use": "Conception de bâtiment pour architectes (licence GPL, code source publié avec l'app)",
+      "icon": "constructlucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "Volumétrie 3D",
+      "use": "Volumes 3D rapides, nom à venir",
+      "kind": "soon"
+    },
+    {
+      "name": "Annotation de plans",
+      "use": "Annoter des plans PDF, nom à venir",
+      "kind": "soon"
+    }
+  ]
+}

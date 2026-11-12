@@ -1,6 +1,6 @@
 {
   "_doc": "Généré par lucraft-upstream/vitrine/generer.py (dépôt Lucraft) : ne pas modifier à la main.",
-  "countWord": "Vingt",
+  "countWord": "Vingt et une",
   "apps": [
     {
       "name": "PhotoLucraft",
@@ -123,9 +123,10 @@
       "kind": "beta"
     },
     {
-      "name": "Annotation de plans",
-      "use": "Annoter des plans PDF, nom à venir",
-      "kind": "soon"
+      "name": "MarkupLucraft",
+      "use": "Annoter et vérifier des plans PDF : mesures à l'échelle, statuts, export CSV et BCF",
+      "icon": "markuplucraft",
+      "kind": "beta"
     }
   ]
 }

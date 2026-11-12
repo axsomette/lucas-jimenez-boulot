@@ -61,7 +61,7 @@ const filters: { id: string; label: string; kind?: Kind }[] = [
   { id: 'lf-ready', label: 'Disponibles', kind: 'ready' },
   { id: 'lf-beta', label: 'Bêta', kind: 'beta' },
   { id: 'lf-soon', label: 'Bientôt', kind: 'soon' },
-];
+].filter(f => !f.kind || count(f.kind) > 0); // no empty filter
 ---
 
 <BaseLayout

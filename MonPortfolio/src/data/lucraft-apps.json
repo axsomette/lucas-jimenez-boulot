@@ -1,6 +1,6 @@
 {
   "_doc": "Généré par lucraft-upstream/vitrine/generer.py (dépôt Lucraft) : ne pas modifier à la main.",
-  "countWord": "Vingt-trois",
+  "countWord": "Vingt-quatre",
   "apps": [
     {
       "name": "PhotoLucraft",
@@ -138,6 +138,12 @@
       "name": "CivilLucraft",
       "use": "Terrain et VRD : relevés, surfaces, terrassements, réseaux, export LandXML et DWG",
       "icon": "civillucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "DetailLucraft",
+      "use": "Charpente métallique et ferraillage : assemblages, plans d'atelier, nomenclatures, fichiers de découpe",
+      "icon": "detaillucraft",
       "kind": "beta"
     }
   ]

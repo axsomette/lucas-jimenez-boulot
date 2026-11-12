@@ -1,6 +1,6 @@
 {
   "_doc": "Généré par lucraft-upstream/vitrine/generer.py (dépôt Lucraft) : ne pas modifier à la main.",
-  "countWord": "Vingt et une",
+  "countWord": "Vingt-deux",
   "apps": [
     {
       "name": "PhotoLucraft",
@@ -126,6 +126,12 @@
       "name": "MarkupLucraft",
       "use": "Annoter et vérifier des plans PDF : mesures à l'échelle, statuts, export CSV et BCF",
       "icon": "markuplucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "TakeoffLucraft",
+      "use": "Métré sur plans PDF et DWG : comptages, longueurs, surfaces, export XLSX",
+      "icon": "takeofflucraft",
       "kind": "beta"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "_doc": "Généré par lucraft-upstream/vitrine/generer.py (dépôt Lucraft) : ne pas modifier à la main.",
-  "countWord": "Vingt-deux",
+  "countWord": "Vingt-trois",
   "apps": [
     {
       "name": "PhotoLucraft",
@@ -132,6 +132,12 @@
       "name": "TakeoffLucraft",
       "use": "Métré sur plans PDF et DWG : comptages, longueurs, surfaces, export XLSX",
       "icon": "takeofflucraft",
+      "kind": "beta"
+    },
+    {
+      "name": "CivilLucraft",
+      "use": "Terrain et VRD : relevés, surfaces, terrassements, réseaux, export LandXML et DWG",
+      "icon": "civillucraft",
       "kind": "beta"
     }
   ]

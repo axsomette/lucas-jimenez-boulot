@@ -1,6 +1,6 @@
 {
   "_doc": "Généré par lucraft-upstream/vitrine/generer.py (dépôt Lucraft) : ne pas modifier à la main.",
-  "countWord": "Dix-neuf",
+  "countWord": "Vingt",
   "apps": [
     {
       "name": "PhotoLucraft",
@@ -117,9 +117,10 @@
       "kind": "beta"
     },
     {
-      "name": "Volumétrie 3D",
-      "use": "Volumes 3D rapides, nom à venir",
-      "kind": "soon"
+      "name": "ModelLucraft",
+      "use": "Maquettage 3D direct : dessiner, pousser, tirer, grouper, exporter",
+      "icon": "modellucraft",
+      "kind": "beta"
     },
     {
       "name": "Annotation de plans",
